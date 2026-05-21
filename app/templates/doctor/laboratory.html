@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full space-y-8 animate-[fadeIn_0.5s_ease-out]">
+    
+    <!-- Header Card -->
+    <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden">
+        <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-green-50/50 to-transparent pointer-events-none"></div>
+        <div class="relative z-10">
+            <span class="text-green-600 font-bold text-xs uppercase tracking-widest">CLINICAL LABORATORY</span>
+            <h1 class="text-3xl font-bold text-slate-900 mt-1">Lab Booking Requests</h1>
+            <p class="text-slate-400 text-sm mt-1">Review diagnostic panel scheduling, compile raw biomarkers, and generate AI explanation reports with PDFs.</p>
+        </div>
+    </div>
+
+    <!-- Bookings Table/Grid -->
+    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                <i class="fa-solid fa-flask"></i>
+            </div>
+            Active Test Orders
+        </h3>
+
+        {% if bookings %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        <th class="py-4 px-4">Patient</th>
+                        <th class="py-4 px-4">Requested Panel</th>
+                        <th class="py-4 px-4">Booking Date</th>
+                        <th class="py-4 px-4">Status</th>
+                        <th class="py-4 px-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50 text-sm">
+                    {% for booking in bookings %}
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="py-4 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs">
+                                    {{ booking.patient.user.name[0] | upper }}
+                                </div>
+                                <div>
+                                    <span class="font-semibold text-slate-900 block">{{ booking.patient.user.name }}</span>
+                                    <span class="text-[10px] text-slate-400 font-medium">ID: #{{ booking.patient.id }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 font-semibold text-slate-800">{{ booking.test_name }}</td>
+                        <td class="py-4 px-4 text-slate-500 font-medium">{{ booking.booking_date.strftime('%d %b %Y') }}</td>
+                        <td class="py-4 px-4">
+                            {% if booking.status == 'Completed' %}
+                                <span class="inline-flex bg-green-50 text-green-700 border border-green-150 text-[10px] font-bold px-2.5 py-1 rounded-xl items-center gap-1">
+                                    <i class="fa-solid fa-circle-check"></i> Complete
+                                </span>
+                            {% else %}
+                                <span class="inline-flex bg-amber-50 text-amber-700 border border-amber-100 text-[10px] font-bold px-2.5 py-1 rounded-xl items-center gap-1 animate-pulse">
+                                    <i class="fa-solid fa-clock"></i> Pending Sample
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-4 text-right">
+                            <div class="flex justify-end gap-2">
+                                {% if booking.status == 'Completed' %}
+                                    {% if booking.result_pdf %}
+                                        <a href="{{ url_for('static', filename=booking.result_pdf) }}" target="_blank" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-all inline-flex items-center gap-1.5 shadow-sm">
+                                            <i class="fa-solid fa-file-pdf"></i> View PDF
+                                        </a>
+                                    {% endif %}
+                                    <button class="ai-explanation-btn bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-all inline-flex items-center gap-1.5 shadow-sm"
+                                            data-test-name="{{ booking.test_name }}"
+                                            data-explanation="{{ booking.result_explanation }}">
+                                        <i class="fa-solid fa-brain"></i> AI Explanation
+                                    </button>
+                                {% else %}
+                                    <button class="enter-results-btn bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all inline-flex items-center gap-1.5 shadow-md shadow-green-950/10 hover:scale-[1.02]"
+                                            data-id="{{ booking.id }}"
+                                            data-patient-name="{{ booking.patient.user.name }}"
+                                            data-test-name="{{ booking.test_name }}">
+                                        <i class="fa-solid fa-square-plus"></i> Enter Results
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-16">
+            <div class="w-16 h-16 rounded-full bg-slate-50 text-slate-350 flex items-center justify-center mx-auto text-3xl mb-4">
+                <i class="fa-solid fa-vials"></i>
+            </div>
+            <h4 class="font-bold text-slate-700">No laboratory test orders</h4>
+            <p class="text-slate-400 text-sm max-w-xs mx-auto mt-1">Any scheduled diagnostics ordered by patients or prescribed by doctors will appear here.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Enter Results Modal -->
+<div id="results-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-lg overflow-hidden animate-[scaleUp_0.3s_ease-out]">
+        <!-- Header -->
+        <div class="bg-slate-900 text-white p-5 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center text-white text-md">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm leading-none text-white">Enter Biomarker Results</h4>
+                    <span class="text-[9px] text-green-400">Pathology Input Desk</span>
+                </div>
+            </div>
+            <button onclick="closeInputModal()" class="text-slate-400 hover:text-white text-md">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="" class="p-6 space-y-4">
+            <input type="hidden" name="booking_id" id="modal-booking-id">
+            
+            <div>
+                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Patient / Panel</span>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="font-bold text-slate-800" id="modal-patient-name">...</span>
+                    <span class="text-slate-300">|</span>
+                    <span class="font-bold text-green-600" id="modal-test-name">...</span>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="raw_result">Raw Diagnostic Output (Biomarkers)</label>
+                <p class="text-[10px] text-slate-400 mb-2">Provide clinical parameters as 'Biomarker: Value Unit'. The system parses these to flag anomalies.</p>
+                <textarea name="raw_result" id="raw_result" rows="8" class="w-full px-4 py-3 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none transition-all font-mono leading-relaxed" required></textarea>
+            </div>
+
+            <div class="p-3 bg-green-50/50 text-green-800 border border-green-100 rounded-xl text-[10px] font-semibold flex gap-2 items-center">
+                <i class="fa-solid fa-microscope text-sm shrink-0"></i>
+                <span>Submitting compiles the ReportLab PDF and invokes the AI Explanation service dynamically.</span>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+                <button type="button" onclick="closeInputModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold text-xs transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-xs transition-colors shadow-lg shadow-green-950/10">
+                    Submit & Generate Report
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- AI Explanation Modal -->
+<div id="explanation-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-lg overflow-hidden animate-[scaleUp_0.3s_ease-out]">
+        <!-- Header -->
+        <div class="bg-slate-900 text-white p-5 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center text-white text-md">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm leading-none text-white" id="explanation-title">AI Insights</h4>
+                    <span class="text-[9px] text-green-400">Clinical Pathology Assistant</span>
+                </div>
+            </div>
+            <button onclick="closeExplanationModal()" class="text-slate-400 hover:text-white text-md">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 space-y-4">
+            <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest font-semibold">Diagnostic Explanations</h5>
+            <div class="p-5 rounded-2xl bg-green-50/50 border border-green-100 text-xs text-green-900 leading-relaxed italic" id="explanation-content">
+                ...
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end">
+            <button onclick="closeExplanationModal()" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Bind enter results buttons
+        const enterResultsBtns = document.querySelectorAll('.enter-results-btn');
+        enterResultsBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                const patientName = btn.getAttribute('data-patient-name');
+                const testName = btn.getAttribute('data-test-name');
+                openInputModal(id, patientName, testName);
+            });
+        });
+
+        // Bind AI explanation buttons
+        const explanationBtns = document.querySelectorAll('.ai-explanation-btn');
+        explanationBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const testName = btn.getAttribute('data-test-name');
+                const explanation = btn.getAttribute('data-explanation');
+                openExplanationModal(testName, explanation);
+            });
+        });
+    });
+
+    const resModal = document.getElementById('results-modal');
+    const modalId = document.getElementById('modal-booking-id');
+    const modalPat = document.getElementById('modal-patient-name');
+    const modalTest = document.getElementById('modal-test-name');
+    const rawResultText = document.getElementById('raw_result');
+
+    const expModal = document.getElementById('explanation-modal');
+    const expTitle = document.getElementById('explanation-title');
+    const expContent = document.getElementById('explanation-content');
+
+    const defaultBiomarkers = 
+`Hemoglobin: 11.4 g/dL
+Glucose: 122.0 mg/dL
+Total Cholesterol: 218.0 mg/dL
+WBC: 7.2 x10^3/mcL
+RBC: 4.5 x10^6/mcL
+Platelets: 220 x10^3/mcL`;
+
+    function openInputModal(id, patientName, testName) {
+        modalId.value = id;
+        modalPat.textContent = patientName;
+        modalTest.textContent = testName;
+        rawResultText.value = defaultBiomarkers;
+        resModal.classList.remove('hidden');
+    }
+
+    function closeInputModal() {
+        resModal.classList.add('hidden');
+    }
+
+    function openExplanationModal(testName, explanation) {
+        expTitle.textContent = `AI Insights: ${testName}`;
+        expContent.textContent = explanation;
+        expModal.classList.remove('hidden');
+    }
+
+    function closeExplanationModal() {
+        expModal.classList.add('hidden');
+    }
+</script>
+{% endblock %}

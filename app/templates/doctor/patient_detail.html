@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full space-y-8 animate-[fadeIn_0.5s_ease-out]">
+    
+    <!-- Welcome Header Card -->
+    <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-green-50/50 to-transparent pointer-events-none"></div>
+        <div class="relative z-10 space-y-1">
+            <span class="text-green-600 font-bold text-xs uppercase tracking-widest">PATIENT FILE ACTIVE</span>
+            <h1 class="text-3xl font-bold text-slate-900 mt-1">{{ patient.user.name }}</h1>
+            <p class="text-slate-400 text-sm mt-1">Review treatment plans, verify adherence compliance, and schedule consultations.</p>
+        </div>
+        <div class="relative z-10 shrink-0">
+            <a href="{{ url_for('doctor.prescribe', patient_id=patient.id) }}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg shadow-green-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-file-medical"></i> Write Prescription
+            </a>
+        </div>
+    </div>
+
+    <!-- Core Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left Column: Patient Medical Details & Compliance Tracker -->
+        <div class="space-y-8 h-fit">
+            
+            <!-- Patient Stats Profile Card -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                        <i class="fa-solid fa-address-card"></i>
+                    </div>
+                    Clinical Card
+                </h3>
+
+                <div class="space-y-3 text-xs text-slate-500">
+                    <div class="flex justify-between py-1.5 border-b border-slate-50">
+                        <span>Age:</span>
+                        <span class="font-bold text-slate-900">{{ patient.age or 'N/A' }} Years</span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-slate-50">
+                        <span>Blood Group:</span>
+                        <span class="font-bold text-red-600 flex items-center gap-1">
+                            <i class="fa-solid fa-droplet text-xs"></i> {{ patient.blood_group or 'N/A' }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-slate-50">
+                        <span>Emergency Number:</span>
+                        <span class="font-bold text-slate-900">{{ patient.emergency_contact or 'N/A' }}</span>
+                    </div>
+                    <div class="flex justify-between py-1.5 border-b border-slate-50">
+                        <span>Attending Registry:</span>
+                        <span class="font-bold text-slate-900">{{ patient.user.phone or 'N/A' }}</span>
+                    </div>
+                    
+                    {% if patient.allergies %}
+                    <div class="flex flex-col pt-3 border-t border-slate-100">
+                        <span class="text-[9px] font-bold text-red-500 uppercase tracking-widest mb-1">CLINICAL ALLERGIES</span>
+                        <p class="bg-red-50 border border-red-100 rounded-xl p-3 text-red-800 font-bold italic leading-relaxed">
+                            {{ patient.allergies }}
+                        </p>
+                    </div>
+                    {% else %}
+                    <div class="flex flex-col pt-3 border-t border-slate-100">
+                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CLINICAL ALLERGIES</span>
+                        <p class="text-slate-400 italic">No reported drug or food allergies.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Adherence Meter -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center">
+                <h3 class="text-sm font-bold text-slate-400 mb-6 w-full text-left uppercase tracking-wider">Historical Adherence</h3>
+                
+                <div class="relative w-40 h-40 flex items-center justify-center mb-6">
+                    <svg class="w-full h-full compliance-progress">
+                        <circle cx="80" cy="80" r="68" stroke="#f1f5f9" stroke-width="10" fill="transparent" />
+                        <circle cx="80" cy="80" r="68" stroke="#22c55e" stroke-width="10" fill="transparent" 
+                                stroke-dasharray="427.2" stroke-dashoffset="{{ 427.2 - (427.2 * adherence_rate / 100) }}" stroke-linecap="round" />
+                    </svg>
+                    <div class="absolute flex flex-col items-center">
+                        <span class="text-3xl font-extrabold text-slate-900 leading-none">{{ adherence_rate }}%</span>
+                        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-1">COMPLIANCE</span>
+                    </div>
+                </div>
+                
+                <p class="text-xs text-slate-500 max-w-[200px]">
+                    Patient dose logs show a historical adherence rating of <span class="font-bold text-slate-900">{{ adherence_rate }}%</span>.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Medications, Laboratory, and Logs -->
+        <div class="lg:col-span-2 space-y-8">
+            
+            <!-- Active Prescriptions -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                        <i class="fa-solid fa-pills"></i>
+                    </div>
+                    Medication List
+                </h3>
+
+                {% if medicines %}
+                <div class="space-y-3">
+                    {% for med in medicines %}
+                    <div class="p-4 rounded-xl border border-slate-100 flex items-center justify-between text-xs hover:border-slate-200 hover:bg-slate-50/20 transition-all">
+                        <div class="overflow-hidden mr-2">
+                            <span class="font-bold text-slate-900 text-sm block truncate">{{ med.medicine_name }}</span>
+                            <span class="text-[10px] text-slate-400 font-semibold mt-0.5">Dosage: {{ med.dosage }} &bull; Timing: {{ med.timing }}</span>
+                        </div>
+                        <span class="bg-slate-100 text-slate-600 font-bold px-2.5 py-1 rounded-lg shrink-0">
+                            {{ med.duration }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-10 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/40">
+                    <p class="text-slate-400 text-xs">No active treatment plans prescribed.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Lab Booking Logs -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                        <i class="fa-solid fa-microscope"></i>
+                    </div>
+                    Diagnostic pathology tests
+                </h3>
+
+                {% if lab_bookings %}
+                <div class="space-y-4">
+                    {% for lab in lab_bookings %}
+                    <div class="p-4 rounded-2xl border border-slate-100 space-y-3">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="font-bold text-slate-900">{{ lab.test_name }}</span>
+                            {% if lab.status == 'Completed' %}
+                                <span class="bg-green-50 text-green-700 border border-green-150 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Completed</span>
+                            {% else %}
+                                <span class="bg-amber-50 text-amber-700 border border-amber-100 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase animate-pulse">Pending Sample</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-semibold">Scheduled Date: {{ lab.booking_date.strftime('%d %b %Y') }}</p>
+                        
+                        {% if lab.status == 'Completed' %}
+                        <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-50">
+                            {% if lab.result_pdf %}
+                            <a href="{{ url_for('static', filename=lab.result_pdf) }}" target="_blank" class="bg-slate-950 hover:bg-slate-800 text-white font-bold text-[10px] px-3.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                                <i class="fa-solid fa-file-pdf"></i> Download Report PDF
+                            </a>
+                            {% endif %}
+                            
+                            {% if lab.result_explanation %}
+                            <button class="lab-explanation-btn bg-green-600 hover:bg-green-700 text-white font-bold text-[10px] px-3.5 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+                                    data-test-name="{{ lab.test_name }}"
+                                    data-explanation="{{ lab.result_explanation | replace("'", "\\'") | replace('"', '\\"') | replace("\n", " ") }}">
+                                <i class="fa-solid fa-brain"></i> AI Summary Insights
+                            </button>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-10 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/40">
+                    <p class="text-slate-400 text-xs">No laboratory diagnostics requested.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Uploaded Medical Reports -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    Diagnostic Scans & Uploads
+                </h3>
+
+                {% if reports %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for rep in reports %}
+                    <div class="p-4 rounded-xl border border-slate-100 flex flex-col justify-between space-y-3">
+                        <div class="space-y-1">
+                            <span class="bg-slate-100 text-slate-500 text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">{{ rep.category }}</span>
+                            <h4 class="font-bold text-slate-900 text-xs truncate" title="{{ rep.title }}">{{ rep.title }}</h4>
+                            <p class="text-[9px] text-slate-400 font-semibold">{{ rep.upload_date.strftime('%d %b %Y') }}</p>
+                        </div>
+                        <a href="{{ url_for('static', filename='uploads/' + rep.file_path) }}" target="_blank" class="w-full text-center py-1.5 rounded-lg border border-slate-250 hover:bg-slate-50 text-slate-600 text-[10px] font-bold transition-all">
+                            View Scanned File
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-10 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/40">
+                    <p class="text-slate-400 text-xs">Patient directory scan folder is empty.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Invoices -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    Billing History
+                </h3>
+
+                {% if invoices %}
+                <div class="space-y-3">
+                    {% for inv in invoices %}
+                    <div class="p-4 rounded-xl border border-slate-100 flex items-center justify-between text-xs hover:border-slate-200 hover:bg-slate-50/20 transition-all">
+                        <div class="overflow-hidden mr-2">
+                            <span class="font-bold text-slate-900 block">#{{ inv.invoice_number }}</span>
+                            <span class="text-[10px] text-slate-400 font-semibold">Total Cost: ₹{{ "%.2f"|format(inv.total) }} &bull; Date: {{ inv.created_at.strftime('%d %b %Y') }}</span>
+                        </div>
+                        {% if inv.payment_status == 'Paid' %}
+                            <span class="bg-green-50 text-green-700 border border-green-150 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Paid</span>
+                        {% else %}
+                            <span class="bg-red-50 text-red-700 border border-red-100 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase animate-pulse">Pending</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-10 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/40">
+                    <p class="text-slate-400 text-xs">No billing ledger found for this profile.</p>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal for Lab explanations -->
+<div id="doctor-lab-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-lg overflow-hidden animate-[scaleUp_0.3s_ease-out]">
+        <!-- Header -->
+        <div class="bg-slate-900 text-white p-5 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center text-white text-md">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm leading-none text-white" id="modal-lab-title">Test Analysis</h4>
+                    <span class="text-[9px] text-green-400">Clinical Automated Assistant</span>
+                </div>
+            </div>
+            <button onclick="closeDoctorLabModal()" class="text-slate-400 hover:text-white text-md">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 space-y-4">
+            <h5 class="text-xs font-bold text-slate-400 uppercase tracking-widest">AI Result Insight</h5>
+            <div class="p-5 rounded-2xl bg-green-50/50 border border-green-100 text-xs text-green-900 leading-relaxed italic" id="modal-lab-explanation">
+                ...
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end">
+            <button onclick="closeDoctorLabModal()" class="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const labExplBtns = document.querySelectorAll('.lab-explanation-btn');
+        labExplBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const testName = btn.getAttribute('data-test-name');
+                const explanation = btn.getAttribute('data-explanation');
+                openLabExplanation(testName, explanation);
+            });
+        });
+    });
+
+    const dModal = document.getElementById('doctor-lab-modal');
+    const dTitle = document.getElementById('modal-lab-title');
+    const dExpl = document.getElementById('modal-lab-explanation');
+
+    function openLabExplanation(testName, text) {
+        dTitle.textContent = `Lab Explanation: ${testName}`;
+        dExpl.textContent = text;
+        dModal.classList.remove('hidden');
+    }
+
+    function closeDoctorLabModal() {
+        dModal.classList.add('hidden');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full space-y-8 animate-[fadeIn_0.5s_ease-out]">
+    
+    <!-- Welcome Header Card -->
+    <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-green-50/50 to-transparent pointer-events-none"></div>
+        <div class="relative z-10 space-y-1">
+            <span class="text-green-600 font-bold text-xs uppercase tracking-widest">CLINICAL HEADQUARTERS</span>
+            <h1 class="text-3xl font-bold text-slate-900">Welcome, Dr. {{ current_user.name }}!</h1>
+            <p class="text-slate-400 text-sm">Review your patient list, manage laboratory requests, and configure consulting hours.</p>
+        </div>
+        <div class="relative z-10 shrink-0">
+            <a href="{{ url_for('doctor.patients') }}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg shadow-green-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2">
+                <i class="fa-solid fa-users"></i> Patient Folders
+            </a>
+        </div>
+    </div>
+
+    <!-- Active Global Emergency SOS Warning -->
+    {% if active_emergencies %}
+    <div class="bg-red-600 text-white border-2 border-red-700 rounded-3xl p-6 shadow-xl space-y-4 animate-pulse">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-white/10 text-white flex items-center justify-center shrink-0 text-2xl animate-bounce">
+                <i class="fa-solid fa-truck-medical"></i>
+            </div>
+            <div class="flex-1 space-y-1">
+                <h4 class="font-extrabold text-lg uppercase tracking-wider">CRITICAL EMERGENCY ALERTS ACTIVE!</h4>
+                <p class="text-sm text-red-100">One or more patients have triggered an Emergency SOS distress call. Dispatch coordination is pending.</p>
+            </div>
+        </div>
+
+        <div class="divide-y divide-red-500/30 bg-red-950/20 rounded-2xl border border-red-500/25 overflow-hidden">
+            {% for sos in active_emergencies %}
+            <div class="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
+                <div>
+                    <span class="font-bold block text-sm">{{ sos.patient.user.name }}</span>
+                    <span class="text-red-200">Blood Group: {{ sos.patient.blood_group or 'N/A' }} &bull; Emergency Contact: {{ sos.patient.emergency_contact or 'N/A' }}</span>
+                    <a href="https://maps.google.com/?q={{ sos.latitude }},{{ sos.longitude }}" target="_blank" class="block text-green-300 font-bold underline mt-1">
+                        <i class="fa-solid fa-location-crosshairs mr-1"></i> Track Live Location GPS ({{ "%.4f"|format(sos.latitude) }}, {{ "%.4f"|format(sos.longitude) }})
+                    </a>
+                </div>
+                
+                <form method="POST" action="{{ url_for('doctor.resolve_sos', sos_id=sos.id) }}" class="shrink-0">
+                    <button type="submit" class="bg-white hover:bg-slate-50 text-red-700 font-extrabold px-4 py-2 rounded-xl transition-colors">
+                        Mark SOS Resolved
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Pharmacy Stock Warnings -->
+    {% if low_stock_count > 0 %}
+    <div class="bg-amber-50 border border-amber-150 rounded-2xl p-4 flex items-center justify-between gap-4 text-amber-900 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 text-lg">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h4 class="font-bold text-sm">Low Pharmacy Stock Warning</h4>
+                <p class="text-xs text-amber-700 mt-0.5">There are {{ low_stock_count }} items in your e-pharmacy directory that fall below threshold levels.</p>
+            </div>
+        </div>
+        <a href="{{ url_for('doctor.pharmacy') }}" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl shrink-0 transition-colors">
+            Manage Stock
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Analytics Dashboard Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0">
+                <i class="fa-solid fa-hospital-user"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Patients</p>
+                <p class="text-2xl font-extrabold text-slate-900">{{ total_patients }} Registered</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center text-xl shrink-0">
+                <i class="fa-regular fa-calendar-check"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Today's Visits</p>
+                <p class="text-2xl font-extrabold text-slate-900">{{ today_appts_count }} Scheduled</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0">
+                <i class="fa-solid fa-file-prescription"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Prescriptions</p>
+                <p class="text-2xl font-extrabold text-slate-900">{{ active_prescriptions }} Active</p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center text-xl shrink-0">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">SOS Distress</p>
+                <p class="text-2xl font-extrabold text-slate-900">{{ active_emergencies | length }} Active</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Schedule Column (Left 2 Cols) -->
+        <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                </div>
+                Today's Consultations List
+            </h3>
+
+            {% if today_appts %}
+            <div class="space-y-4">
+                {% for appt in today_appts %}
+                <div class="p-5 rounded-2xl border border-slate-100 hover:border-slate-200 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-slate-50 text-slate-700 flex items-center justify-center font-bold text-sm shrink-0 border border-slate-150">
+                            {{ appt.patient.user.name[0] | upper }}
+                        </div>
+                        <div class="space-y-0.5 overflow-hidden">
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-slate-900 text-sm truncate">{{ appt.patient.user.name }}</h4>
+                                {% if appt.is_telemedicine %}
+                                <span class="bg-blue-50 text-blue-600 border border-blue-100 text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">Telemed</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-xs text-slate-400 font-semibold">
+                                <i class="fa-regular fa-clock mr-0.5"></i> Time: {{ appt.time.strftime('%I:%M %p') }}
+                                <span class="mx-1 text-slate-350">&bull;</span>
+                                <i class="fa-solid fa-droplet text-red-500 mr-0.5"></i> Blood Group: {{ appt.patient.blood_group or 'N/A' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0 self-end md:self-center">
+                        {% if appt.status in ['Approved', 'Scheduled'] %}
+                            {% if appt.is_telemedicine and appt.room_id %}
+                                <a href="{{ url_for('patient.telemedicine_room', room_id=appt.room_id) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-md shadow-blue-900/10 flex items-center gap-1">
+                                    <i class="fa-solid fa-video animate-pulse"></i> Enter Room
+                                </a>
+                            {% else %}
+                                <span class="bg-green-50 text-green-700 border border-green-150 text-[10px] font-bold px-3 py-1 rounded-xl">Clinic Visited</span>
+                            {% endif %}
+                        {% elif appt.status == 'Pending' %}
+                            <span class="bg-amber-50 text-amber-700 border border-amber-100 text-[10px] font-bold px-3 py-1 rounded-xl">Pending</span>
+                        {% else %}
+                            <span class="bg-red-50 text-red-700 border border-red-100 text-[10px] font-bold px-3 py-1 rounded-xl">Cancelled</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-16">
+                <div class="w-16 h-16 rounded-full bg-slate-50 text-slate-300 flex items-center justify-center mx-auto text-3xl mb-4">
+                    <i class="fa-regular fa-calendar-times"></i>
+                </div>
+                <h4 class="font-bold text-slate-700">No scheduled visits today</h4>
+                <p class="text-slate-400 text-sm max-w-xs mx-auto mt-1">Attending schedule is free. Approved appointments will display here automatically.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Approvals / Request Desk (Right 1 Col) -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6 h-fit">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                Booking Requests
+            </h3>
+
+            {% if pending_approvals %}
+            <div class="space-y-4">
+                {% for appt in pending_approvals %}
+                <div class="p-4 rounded-2xl border border-slate-100 bg-slate-50/20 space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0 border border-slate-200">
+                            {{ appt.patient.user.name[0] | upper }}
+                        </div>
+                        <div class="overflow-hidden">
+                            <h4 class="font-bold text-slate-900 text-xs truncate">{{ appt.patient.user.name }}</h4>
+                            <p class="text-[10px] text-slate-400 font-semibold">Requested: {{ appt.date.strftime('%d %b') }} &bull; {{ appt.time.strftime('%I:%M %p') }}</p>
+                        </div>
+                    </div>
+
+                    {% if appt.notes %}
+                    <p class="text-[10px] text-slate-500 italic bg-white p-2 rounded-lg border border-slate-100 leading-normal">
+                        "{{ appt.notes }}"
+                    </p>
+                    {% endif %}
+
+                    <div class="flex gap-2 pt-1">
+                        <form method="POST" action="{{ url_for('doctor.approve_appointment', appt_id=appt.id) }}" class="flex-1">
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 rounded-lg text-[10px] shadow-sm transition-colors">
+                                Approve
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ url_for('doctor.reject_appointment', appt_id=appt.id) }}" class="flex-1">
+                            <button type="submit" class="w-full bg-white hover:bg-slate-50 text-red-600 border border-slate-200 hover:border-red-200 font-bold py-1.5 rounded-lg text-[10px] transition-colors">
+                                Reject
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-10 text-slate-400 space-y-2">
+                <i class="fa-solid fa-check-double text-3xl text-slate-300"></i>
+                <p class="text-xs">No pending booking approvals.</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

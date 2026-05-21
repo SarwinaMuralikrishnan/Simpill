@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full space-y-6 animate-[fadeIn_0.5s_ease-out] flex-grow flex flex-col">
+    
+    <!-- Consult Header Bar -->
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center font-bold text-lg animate-pulse">
+                <i class="fa-solid fa-video"></i>
+            </div>
+            <div>
+                <span class="text-green-600 font-bold text-[10px] uppercase tracking-widest block">TELE-HEALTH CONSULTATION ROOM</span>
+                <h1 class="text-xl font-bold text-slate-900 leading-tight">Room: #{{ room_id }}</h1>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="inline-flex bg-green-50 text-green-700 border border-green-150 text-[10px] font-bold px-2.5 py-1 rounded-xl items-center gap-1.5" id="connection-status">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span> Connecting Streams...
+            </span>
+            <a href="javascript:history.back()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all">
+                Leave Consultation
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Telemedicine Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow items-stretch">
+        
+        <!-- Video Stream Box (Left 2 Columns) -->
+        <div class="lg:col-span-2 bg-slate-950 rounded-3xl p-4 border border-slate-800 flex flex-col justify-between relative min-h-[480px] overflow-hidden">
+            
+            <!-- Remote Feed (Main Screen) -->
+            <div class="absolute inset-0 w-full h-full bg-slate-900 flex items-center justify-center">
+                <video id="remoteVideo" class="w-full h-full object-cover" autoplay playsinline></video>
+                
+                <!-- Remote Offline Placeholder -->
+                <div id="remotePlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 bg-slate-900 z-10">
+                    <div class="w-20 h-20 rounded-full bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center text-3xl mb-4">
+                        <i class="fa-solid fa-user-doctor" id="placeholder-icon"></i>
+                    </div>
+                    <h3 class="text-white font-bold text-lg" id="placeholder-title">Awaiting Doctor Feed...</h3>
+                    <p class="text-slate-500 text-xs mt-1">Connecting to clinical stream. Please ensure camera access is enabled.</p>
+                </div>
+            </div>
+
+            <!-- Local Feed (Picture in Picture Box) -->
+            <div class="absolute bottom-20 right-4 w-40 md:w-52 aspect-[4/3] rounded-2xl overflow-hidden border-2 border-slate-700 bg-slate-800 shadow-2xl z-20">
+                <video id="localVideo" class="w-full h-full object-cover scale-x-[-1]" autoplay playsinline muted></video>
+                <div class="absolute bottom-2 left-2 bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded">
+                    You (Attending)
+                </div>
+            </div>
+
+            <!-- Overlay Labels -->
+            <div class="relative z-10 flex justify-between items-start pointer-events-none w-full">
+                <div class="bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle text-red-500 text-[8px] animate-pulse"></i>
+                    <span id="remote-feed-label">Consultant Feed</span>
+                </div>
+            </div>
+
+            <!-- Media Control Options Bar -->
+            <div class="relative z-30 flex items-center justify-center gap-4 py-2 mt-auto w-full">
+                <!-- Toggle Audio -->
+                <button id="toggle-audio" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition-all shadow-lg hover:scale-105">
+                    <i class="fa-solid fa-microphone text-md"></i>
+                </button>
+                <!-- Toggle Video -->
+                <button id="toggle-video" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition-all shadow-lg hover:scale-105">
+                    <i class="fa-solid fa-video text-md"></i>
+                </button>
+                <!-- Screen Share (Demo) -->
+                <button id="share-screen" class="w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition-all shadow-lg hover:scale-105">
+                    <i class="fa-solid fa-display text-md"></i>
+                </button>
+                <!-- End Call -->
+                <button id="hang-up" onclick="history.back()" class="w-14 h-14 rounded-full bg-red-650 hover:bg-red-700 text-white flex items-center justify-center transition-all shadow-lg hover:scale-105">
+                    <i class="fa-solid fa-phone-slash text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat & Notes Console Sidebar (Right Column) -->
+        <div class="bg-white rounded-3xl border border-slate-100 flex flex-col justify-between overflow-hidden shadow-sm h-full min-h-[480px]">
+            <!-- Header -->
+            <div class="bg-slate-900 text-white p-4 shrink-0 flex items-center gap-2">
+                <div class="w-7 h-7 rounded bg-green-600 flex items-center justify-center text-white text-sm">
+                    <i class="fa-solid fa-comment-medical"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-xs leading-none text-white">Consultation Log Chat</h4>
+                    <span class="text-[9px] text-green-400">Encrypted peer connection channel</span>
+                </div>
+            </div>
+
+            <!-- Messages List -->
+            <div class="flex-grow p-4 overflow-y-auto space-y-3 bg-slate-50 text-[11px]" id="consultation-chat-messages">
+                <div class="flex gap-2">
+                    <div class="w-6 h-6 rounded bg-slate-200 text-slate-700 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-server text-[9px]"></i>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-slate-500 max-w-[80%] shadow-sm">
+                        Welcome to Room #{{ room_id }}. Tele-consultation session initiated. Awaiting other peer to establish video/audio hook.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Box -->
+            <form id="consultation-chat-form" class="p-3 bg-white border-t border-slate-100 shrink-0 flex gap-2">
+                <input type="text" id="consultation-chat-input" placeholder="Type consultation notes..." class="flex-grow px-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none transition-all" required>
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3.5 py-2.5 rounded-xl transition-colors shrink-0">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Audio/Video toggle variables
+    let isAudioOn = true;
+    let isVideoOn = true;
+    let localStream = null;
+
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const remotePlaceholder = document.getElementById('remotePlaceholder');
+    const connectionStatus = document.getElementById('connection-status');
+    const remoteFeedLabel = document.getElementById('remote-feed-label');
+    const placeholderTitle = document.getElementById('placeholder-title');
+    const placeholderIcon = document.getElementById('placeholder-icon');
+
+    const toggleAudioBtn = document.getElementById('toggle-audio');
+    const toggleVideoBtn = document.getElementById('toggle-video');
+    const shareScreenBtn = document.getElementById('share-screen');
+
+    // Consultation Chat variables
+    const chatForm = document.getElementById('consultation-chat-form');
+    const chatInput = document.getElementById('consultation-chat-input');
+    const chatMessages = document.getElementById('consultation-chat-messages');
+
+    // 1. Get local camera feed
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+            localStream = stream;
+            localVideo.srcObject = stream;
+            
+            // Connect remote feed simulator after 2.5 seconds
+            setTimeout(simulateRemoteFeed, 2500);
+        })
+        .catch(err => {
+            console.warn("Unable to capture camera feed. Simulating layout locally.", err);
+            appendSystemMessage("Camera capture denied or unavailable. Telemedicine layout degraded to audio-only/simulated mode.");
+            
+            // Still connect simulated feed
+            setTimeout(simulateRemoteFeed, 2500);
+        });
+
+    // 2. Simulate Doctor / Patient Peer Feed Connection
+    function simulateRemoteFeed() {
+        remotePlaceholder.classList.add('hidden');
+        connectionStatus.className = "inline-flex bg-green-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-xl items-center gap-1.5";
+        connectionStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> SECURE CALL CONNECTED`;
+
+        // If local stream is active, mirror it to remote stream box for high-fidelity demo
+        if (localStream) {
+            remoteVideo.srcObject = localStream;
+            // Mirror it back or apply slightly different CSS filters to make it look like a separate screen
+            remoteVideo.style.filter = "contrast(1.05) saturate(1.1)";
+        } else {
+            // No local camera -> show a beautiful placeholder card
+            remotePlaceholder.classList.remove('hidden');
+            placeholderTitle.textContent = "Feed Active (No Video)";
+            placeholderIcon.className = "fa-solid fa-headset text-green-500 text-3xl mb-4";
+        }
+
+        appendSystemMessage("WebRTC session established. Attending doctor has joined the room.");
+        setTimeout(() => {
+            appendConsultantMessage("Hello! I am reviewing your diagnostic parameters. How are you feeling today?");
+        }, 1500);
+    }
+
+    // Toggle Microphone
+    toggleAudioBtn.addEventListener('click', () => {
+        isAudioOn = !isAudioOn;
+        if (localStream) {
+            localStream.getAudioTracks().forEach(track => track.enabled = isAudioOn);
+        }
+        toggleAudioBtn.className = isAudioOn 
+            ? "w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition-all shadow-lg"
+            : "w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition-all shadow-lg";
+        toggleAudioBtn.innerHTML = isAudioOn 
+            ? `<i class="fa-solid fa-microphone text-md"></i>`
+            : `<i class="fa-solid fa-microphone-slash text-md"></i>`;
+            
+        appendSystemMessage(`Microphone ${isAudioOn ? "unmuted" : "muted"}`);
+    });
+
+    // Toggle Camera
+    toggleVideoBtn.addEventListener('click', () => {
+        isVideoOn = !isVideoOn;
+        if (localStream) {
+            localStream.getVideoTracks().forEach(track => track.enabled = isVideoOn);
+        }
+        toggleVideoBtn.className = isVideoOn 
+            ? "w-12 h-12 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center transition-all shadow-lg"
+            : "w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition-all shadow-lg";
+        toggleVideoBtn.innerHTML = isVideoOn 
+            ? `<i class="fa-solid fa-video text-md"></i>`
+            : `<i class="fa-solid fa-video-slash text-md"></i>`;
+            
+        localVideo.style.opacity = isVideoOn ? "1" : "0.2";
+        appendSystemMessage(`Camera stream ${isVideoOn ? "resumed" : "stopped"}`);
+    });
+
+    // Screen Share
+    shareScreenBtn.addEventListener('click', () => {
+        appendSystemMessage("Requesting screen capture stream...");
+        navigator.mediaDevices.getDisplayMedia({ video: true })
+            .then(screenStream => {
+                appendSystemMessage("Sharing screen stream to consultant peer.");
+                if (localStream) {
+                    localVideo.srcObject = screenStream;
+                }
+                screenStream.getVideoTracks()[0].onended = () => {
+                    localVideo.srcObject = localStream;
+                    appendSystemMessage("Screen sharing stream terminated.");
+                };
+            })
+            .catch(err => {
+                appendSystemMessage("Screen sharing capture cancelled.");
+            });
+    });
+
+    // Chat Form Submissions
+    chatForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const msg = chatInput.value.trim();
+        if (!msg) return;
+
+        appendMyMessage(msg);
+        chatInput.value = "";
+
+        // Simulated Response from consultant after 2 seconds
+        setTimeout(() => {
+            if (msg.toLowerCase().includes("headache") || msg.toLowerCase().includes("pain")) {
+                appendConsultantMessage("I understand. Please make sure to stick to the Paracetamol timeline prescribed. Drink plenty of fluids.");
+            } else if (msg.toLowerCase().includes("bp") || msg.toLowerCase().includes("blood pressure")) {
+                appendConsultantMessage("We will schedule a clinic visit if the blood pressure metrics continue to exceed the standard reference ranges.");
+            } else {
+                appendConsultantMessage("Noted. I have updated the consultation records accordingly.");
+            }
+        }, 2000);
+    });
+
+    function appendSystemMessage(text) {
+        const row = document.createElement('div');
+        row.className = "flex gap-2 justify-center py-1";
+        row.innerHTML = `<span class="bg-slate-100 text-slate-400 font-semibold px-2 py-0.5 rounded text-[8px] uppercase tracking-wider text-center">${text}</span>`;
+        chatMessages.appendChild(row);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendMyMessage(text) {
+        const row = document.createElement('div');
+        row.className = "flex gap-2 justify-end";
+        row.innerHTML = `
+            <div class="bg-green-600 text-white p-2 rounded-xl text-slate-700 max-w-[80%] shadow-sm">
+                ${text}
+            </div>
+        `;
+        chatMessages.appendChild(row);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendConsultantMessage(text) {
+        const row = document.createElement('div');
+        row.className = "flex gap-2";
+        row.innerHTML = `
+            <div class="w-6 h-6 rounded bg-slate-200 text-slate-700 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-user-doctor text-[9px]"></i>
+            </div>
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-slate-700 max-w-[80%] shadow-sm leading-relaxed">
+                ${text}
+            </div>
+        `;
+        chatMessages.appendChild(row);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+</script>
+{% endblock %}

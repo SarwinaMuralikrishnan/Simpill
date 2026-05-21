@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full space-y-8 animate-[fadeIn_0.5s_ease-out]">
+    
+    <!-- Header Card -->
+    <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-green-50/50 to-transparent pointer-events-none"></div>
+        <div class="relative z-10">
+            <span class="text-green-600 font-bold text-xs uppercase tracking-widest">CLINIC REGISTRY</span>
+            <h1 class="text-3xl font-bold text-slate-900 mt-1">Consultation Availability</h1>
+            <p class="text-slate-400 text-sm mt-1">Configure your specialization, professional history years, and scheduling calendar bounds.</p>
+        </div>
+        <div class="relative z-10 shrink-0">
+            <a href="{{ url_for('doctor.dashboard') }}" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl text-xs font-bold transition-colors">
+                &larr; Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Settings Form Card -->
+    <div class="max-w-3xl bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            Update Profile & Timings
+        </h3>
+
+        <form method="POST" action="" class="space-y-6">
+            {{ form.hidden_tag() }}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Specialization -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="specialization">Medical Specialization</label>
+                    {{ form.specialization(class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none", placeholder="e.g. Cardiology, Pediatrics") }}
+                    {% for error in form.specialization.errors %}
+                        <span class="text-xs text-red-500 font-semibold mt-1 block">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <!-- Experience -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="experience">Experience (Years)</label>
+                    {{ form.experience(class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none", type="number", min="0", placeholder="e.g. 10") }}
+                    {% for error in form.experience.errors %}
+                        <span class="text-xs text-red-500 font-semibold mt-1 block">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <!-- Available From -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="available_from">Consultation Start Time</label>
+                    {{ form.available_from(class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none", type="time") }}
+                    {% for error in form.available_from.errors %}
+                        <span class="text-xs text-red-500 font-semibold mt-1 block">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <!-- Available To -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="available_to">Consultation Close Time</label>
+                    {{ form.available_to(class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none", type="time") }}
+                    {% for error in form.available_to.errors %}
+                        <span class="text-xs text-red-500 font-semibold mt-1 block">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Available Days check-pill selection -->
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Available Consultation Days</label>
+                
+                <!-- Pill Widget UI -->
+                <div class="flex flex-wrap gap-2 mb-3" id="days-pill-container">
+                    {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                    <button type="button" data-day="{{ day }}" onclick="toggleDaySelection(this)" 
+                            class="px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 hover:border-green-400 transition-all select-none">
+                        {{ day }}
+                    </button>
+                    {% endfor %}
+                </div>
+
+                <!-- Hidden Input bound to WTForms field -->
+                {{ form.available_days(id="hidden-available-days-input", class="hidden") }}
+                {% for error in form.available_days.errors %}
+                    <span class="text-xs text-red-500 font-semibold mt-1 block">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- Submit Button -->
+            {{ form.submit(class="w-full py-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-sm shadow-lg shadow-green-950/20 hover:shadow-xl transition-all cursor-pointer") }}
+        </form>
+    </div>
+</div>
+
+<script>
+    const hiddenDaysInput = document.getElementById('hidden-available-days-input');
+    const container = document.getElementById('days-pill-container');
+
+    // Parse existing days from the hidden input on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const activeDays = hiddenDaysInput.value ? hiddenDaysInput.value.split(',').map(d => d.trim()) : [];
+        
+        container.querySelectorAll('button').forEach(btn => {
+            const dayName = btn.getAttribute('data-day');
+            if (activeDays.includes(dayName)) {
+                btn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-green-600 border border-green-600 text-white shadow-md shadow-green-950/15 transition-all select-none";
+            } else {
+                btn.className = "px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 hover:border-green-400 text-slate-600 bg-white transition-all select-none";
+            }
+        });
+    });
+
+    function toggleDaySelection(btn) {
+        const dayName = btn.getAttribute('data-day');
+        let activeDays = hiddenDaysInput.value ? hiddenDaysInput.value.split(',').map(d => d.trim()) : [];
+
+        if (activeDays.includes(dayName)) {
+            // Remove
+            activeDays = activeDays.filter(d => d !== dayName);
+            btn.className = "px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 hover:border-green-400 text-slate-600 bg-white transition-all select-none";
+        } else {
+            // Add
+            activeDays.push(dayName);
+            btn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-green-600 border border-green-600 text-white shadow-md shadow-green-950/15 transition-all select-none";
+        }
+
+        // Write back to comma separated input
+        hiddenDaysInput.value = activeDays.join(',');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: simpill_web
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - SECRET_KEY=production-secret-key-change-me-123
+      - DATABASE_URL=sqlite:///simpill.db
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - simpill_data:/app/instance
+      - simpill_uploads:/app/app/static/uploads
+    depends_on:
+      - ollama
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: simpill_ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+volumes:
+  simpill_data:
+  simpill_uploads:
+  ollama_data:

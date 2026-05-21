@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full space-y-8 animate-[fadeIn_0.5s_ease-out]">
+    
+    <!-- Header Card -->
+    <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden">
+        <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-green-50/50 to-transparent pointer-events-none"></div>
+        <div class="relative z-10">
+            <span class="text-green-600 font-bold text-xs uppercase tracking-widest">PHARMACY STORES</span>
+            <h1 class="text-3xl font-bold text-slate-900 mt-1">Inventory Management</h1>
+            <p class="text-slate-400 text-sm mt-1">Track medication store stock levels, monitor expiry timelines, and configure alert triggers for replenishments.</p>
+        </div>
+    </div>
+
+    <!-- Layout Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Add Stock Form (Left 1 Col on Desktop) -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-fit space-y-6">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                    <i class="fa-solid fa-prescription-bottle-medical"></i>
+                </div>
+                Add / Update Stock
+            </h3>
+
+            <form method="POST" action="" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="name">Medicine Name</label>
+                    <input type="text" name="name" id="name" required placeholder="e.g. Paracetamol 500mg" class="w-full px-4 py-3 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="quantity">Quantity (Units)</label>
+                        <input type="number" name="quantity" id="quantity" required min="1" placeholder="100" class="w-full px-4 py-3 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="price">Unit Price (₹)</label>
+                        <input type="number" step="0.01" name="price" id="price" required min="0" placeholder="45.00" class="w-full px-4 py-3 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="expiry_date">Expiry Date</label>
+                    <input type="date" name="expiry_date" id="expiry_date" required class="w-full px-4 py-3 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="barcode">Barcode Number</label>
+                    <input type="text" name="barcode" id="barcode" placeholder="e.g. 8901234567812" class="w-full px-4 py-3 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="low_stock_threshold">Low Stock Warning Threshold</label>
+                    <input type="number" name="low_stock_threshold" id="low_stock_threshold" required min="1" value="10" class="w-full px-4 py-3 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none">
+                </div>
+
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-xs shadow-md shadow-green-950/10 hover:scale-[1.01] transition-all cursor-pointer">
+                    Commit to Inventory
+                </button>
+            </form>
+        </div>
+
+        <!-- Inventory List (Right 2 Cols) -->
+        <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                Current Catalog Levels
+            </h3>
+
+            {% if inventory %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            <th class="py-4 px-4">Item Name</th>
+                            <th class="py-4 px-4 text-center">In Stock</th>
+                            <th class="py-4 px-4 text-right">Price</th>
+                            <th class="py-4 px-4">Expiry Date</th>
+                            <th class="py-4 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 text-sm">
+                        {% for item in inventory %}
+                        {% set is_low = item.quantity <= item.low_stock_threshold %}
+                        <tr class="hover:bg-slate-50/50 transition-colors {% if is_low %}bg-red-50/20{% endif %}">
+                            <td class="py-4 px-4">
+                                <div>
+                                    <span class="font-bold text-slate-900 block">{{ item.name }}</span>
+                                    {% if item.barcode %}
+                                    <span class="text-[9px] text-slate-400 font-mono"><i class="fa-solid fa-barcode"></i> {{ item.barcode }}</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="py-4 px-4 text-center">
+                                {% if is_low %}
+                                    <span class="bg-red-50 text-red-700 border border-red-100 text-[10px] font-bold px-2 py-0.5 rounded-lg inline-block">
+                                        {{ item.quantity }} (Low Stock)
+                                    </span>
+                                {% else %}
+                                    <span class="text-slate-700 font-bold">{{ item.quantity }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 px-4 text-right font-extrabold text-slate-800">₹{{ "%.2f"|format(item.price) }}</td>
+                            <td class="py-4 px-4 text-slate-500 font-medium text-xs">{{ item.expiry_date.strftime('%d %b %Y') }}</td>
+                            <td class="py-4 px-4 text-right">
+                                <button class="quick-adjust-btn text-green-600 hover:text-green-700 font-bold text-xs bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition-colors"
+                                        data-name="{{ item.name }}"
+                                        data-quantity="{{ item.quantity }}"
+                                        data-price="{{ item.price }}"
+                                        data-expiry="{{ item.expiry_date.strftime('%Y-%m-%d') }}"
+                                        data-barcode="{{ item.barcode or '' }}"
+                                        data-threshold="{{ item.low_stock_threshold }}">
+                                    Quick Adjust
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-16">
+                <div class="w-16 h-16 rounded-full bg-slate-50 text-slate-350 flex items-center justify-center mx-auto text-3xl mb-4">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <h4 class="font-bold text-slate-700">Inventory is empty</h4>
+                <p class="text-slate-400 text-sm max-w-xs mx-auto mt-1">No products are registered. Register new pharmaceuticals in the stock panel on the left.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const adjustBtns = document.querySelectorAll('.quick-adjust-btn');
+        adjustBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const name = btn.getAttribute('data-name');
+                const quantity = parseInt(btn.getAttribute('data-quantity'), 10);
+                const price = parseFloat(btn.getAttribute('data-price'));
+                const expiryDate = btn.getAttribute('data-expiry');
+                const barcode = btn.getAttribute('data-barcode');
+                const threshold = parseInt(btn.getAttribute('data-threshold'), 10);
+                
+                populateEditForm(name, quantity, price, expiryDate, barcode, threshold);
+            });
+        });
+    });
+
+    function populateEditForm(name, quantity, price, expiryDate, barcode, threshold) {
+        document.getElementById('name').value = name;
+        document.getElementById('quantity').value = quantity;
+        document.getElementById('price').value = price;
+        document.getElementById('expiry_date').value = expiryDate;
+        document.getElementById('barcode').value = barcode || '';
+        document.getElementById('low_stock_threshold').value = threshold;
+        
+        // Highlight form inputs briefly
+        const formContainer = document.querySelector('form');
+        formContainer.scrollIntoView({ behavior: 'smooth' });
+        
+        const inputs = ['name', 'quantity', 'price', 'expiry_date', 'barcode', 'low_stock_threshold'];
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.classList.add('ring-2', 'ring-green-500', 'ring-opacity-50');
+                setTimeout(() => {
+                    input.classList.remove('ring-2', 'ring-green-500', 'ring-opacity-50');
+                }, 1000);
+            }
+        });
+    }
+</script>
+{% endblock %}

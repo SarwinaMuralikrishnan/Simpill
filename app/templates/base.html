@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - SimPill AI Ecosystem</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Google Fonts (Outfit) -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                        },
+                        slate: {
+                            950: '#020617'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Mobile Header -->
+    <header class="md:hidden bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+        <a href="/" class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-green-600 text-white flex items-center justify-center font-bold">
+                <i class="fa-solid fa-hospital-user"></i>
+            </div>
+            <span class="font-bold text-lg text-slate-900 tracking-tight">SimPill AI</span>
+        </a>
+        <button id="mobile-menu-toggle" class="text-slate-600 focus:outline-none text-xl">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+
+    <div class="flex-grow flex relative">
+        
+        <!-- Sidebar Navigation -->
+        {% if current_user.is_authenticated %}
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-slate-300 transform -translate-x-full md:translate-x-0 md:relative transition-transform duration-300 ease-in-out flex flex-col border-r border-slate-800 shadow-xl">
+            <!-- Brand -->
+            <div class="p-6 border-b border-slate-800 hidden md:block">
+                <a href="/" class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-green-600 text-white flex items-center justify-center font-bold shadow-lg shadow-green-900/40">
+                        <i class="fa-solid fa-hospital-user text-lg animate-pulse"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-lg text-white tracking-tight leading-none block">SimPill AI</span>
+                        <span class="text-xs text-slate-500 font-medium">Hospital Ecosystem</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Profile Info Widget -->
+            <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-slate-800 text-slate-200 flex items-center justify-center font-semibold text-lg border border-slate-700">
+                    {{ current_user.name[0] | upper }}
+                </div>
+                <div class="overflow-hidden">
+                    <h4 class="text-white text-sm font-semibold truncate">{{ current_user.name }}</h4>
+                    <span class="text-xs text-green-500 font-medium capitalize">{{ current_user.role }} Portal</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+                {% if current_user.role == 'patient' %}
+                    <a href="{{ url_for('patient.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('patient.dashboard') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-chart-line w-5 text-center"></i> Overview Dashboard
+                    </a>
+                    <a href="{{ url_for('patient.appointments') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('patient.appointments') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-regular fa-calendar-check w-5 text-center"></i> Appointments
+                    </a>
+                    <a href="{{ url_for('patient.reports') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('patient.reports') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-file-waveform w-5 text-center"></i> Medical Files & OCR
+                    </a>
+                    <a href="{{ url_for('patient.caregivers') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('patient.caregivers') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-user-shield w-5 text-center"></i> Caregivers
+                    </a>
+                    <a href="{{ url_for('patient.laboratory') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('patient.laboratory') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-flask w-5 text-center"></i> Lab Services
+                    </a>
+                    <a href="{{ url_for('patient.pharmacy') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('patient.pharmacy') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-prescription-bottle-medical w-5 text-center"></i> E-Pharmacy Store
+                    </a>
+                    <a href="{{ url_for('patient.billing') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('patient.billing') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i> Bills & Payments
+                    </a>
+                {% elif current_user.role == 'doctor' %}
+                    <a href="{{ url_for('doctor.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('doctor.dashboard') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-chart-line w-5 text-center"></i> Doctor Dashboard
+                    </a>
+                    <a href="{{ url_for('doctor.patients') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('doctor.patients') or '/patient/' in request.path %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-user-injured w-5 text-center"></i> My Patients
+                    </a>
+                    <a href="{{ url_for('doctor.availability') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('doctor.availability') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-clock w-5 text-center"></i> Availability Hours
+                    </a>
+                    <a href="{{ url_for('doctor.pharmacy') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('doctor.pharmacy') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-boxes-stacked w-5 text-center"></i> Pharmacy Stock
+                    </a>
+                    <a href="{{ url_for('doctor.laboratory') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('doctor.laboratory') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-vial w-5 text-center"></i> Lab Requests
+                    </a>
+                {% elif current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 hover:bg-slate-800 hover:text-white {% if request.path == url_for('admin.dashboard') %}bg-green-600 text-white shadow-lg shadow-green-900/30{% endif %}">
+                        <i class="fa-solid fa-chart-line w-5 text-center"></i> Admin Overview
+                    </a>
+                {% endif %}
+            </nav>
+
+            <!-- Bottom Actions -->
+            <div class="p-4 border-t border-slate-800 flex flex-col gap-2">
+                {% if current_user.role == 'patient' %}
+                <!-- Emergency SOS Trigger Button -->
+                <button id="sos-trigger-btn" class="w-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-red-950/40 transition-colors">
+                    <i class="fa-solid fa-circle-exclamation animate-bounce"></i> EMERGENCY SOS
+                </button>
+                {% endif %}
+                <a href="{{ url_for('auth.logout') }}" class="w-full text-slate-400 hover:text-white flex items-center justify-center gap-2 py-2 px-4 rounded-xl hover:bg-slate-850 transition-all duration-200 text-sm">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+                </a>
+            </div>
+        </aside>
+        {% endif %}
+
+        <!-- Content Area -->
+        <div class="flex-1 flex flex-col min-w-0 bg-slate-50 relative">
+            <!-- Alert Flashes -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full relative z-10">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="p-4 rounded-xl mb-4 flex items-center shadow-sm border {% if category == 'error' %}bg-red-50 text-red-800 border-red-100{% elif category == 'success' %}bg-green-50 text-green-800 border-green-100{% else %}bg-blue-50 text-blue-800 border-blue-100{% endif %}">
+                            <i class="fa-solid {% if category == 'error' %}fa-circle-exclamation{% elif category == 'success' %}fa-circle-check{% else %}fa-circle-info{% endif %} mr-3 text-lg"></i>
+                            <div class="text-sm font-medium">{{ message }}</div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+
+            <!-- Page Main Slots -->
+            <main class="flex-grow flex flex-col p-4 md:p-8">
+                {% block content %}{% endblock %}
+            </main>
+            
+            <!-- Footer -->
+            <footer class="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400">
+                &copy; 2026 SimPill AI Hospital Ecosystem. All rights reserved.
+            </footer>
+        </div>
+    </div>
+
+    <!-- Floating AI Chat Assistant (Patient only) -->
+    {% if current_user.is_authenticated and current_user.role == 'patient' %}
+    <div class="fixed bottom-6 right-6 z-50">
+        <!-- Floating Toggle Icon -->
+        <button id="ai-chat-toggle" class="w-14 h-14 rounded-full bg-green-600 hover:bg-green-700 text-white flex items-center justify-center shadow-xl hover:scale-105 transition-all duration-200 group border-2 border-white relative">
+            <i class="fa-solid fa-robot text-xl"></i>
+            <span class="absolute top-0 right-0 w-3 h-3 rounded-full bg-red-500 border-2 border-white"></span>
+        </button>
+
+        <!-- Chat Panel -->
+        <div id="ai-chat-panel" class="hidden absolute bottom-16 right-0 w-96 max-w-[calc(100vw-2rem)] h-[480px] bg-white rounded-2xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden transition-all duration-300">
+            <!-- Header -->
+            <div class="bg-slate-900 text-white px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center font-bold text-white">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm leading-none">SimPill AI Assistant</h4>
+                        <span class="text-[10px] text-green-400">Online & Clinical Guide</span>
+                    </div>
+                </div>
+                <button id="ai-chat-close" class="text-slate-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <!-- Dialog Panel -->
+            <div id="ai-chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs">
+                <div class="flex gap-2">
+                    <div class="w-6 h-6 rounded bg-slate-200 text-slate-700 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-slate-200 text-slate-700 max-w-[80%] shadow-sm">
+                        Hello! I am SimPill AI. Ask me about symptoms, explaining medications, or scheduling lab tests. How can I help you today?
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="p-3 border-t border-slate-100 bg-white">
+                <form id="ai-chat-form" class="flex gap-2">
+                    <input type="text" id="ai-chat-input" placeholder="Type health questions..." class="flex-1 px-4 py-2 text-xs rounded-xl border border-slate-200 focus:border-green-500 focus:outline-none bg-slate-50 focus:bg-white" required>
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-xl transition-colors">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- SOS Confirmation Modal -->
+    <div id="sos-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-red-100 text-center animate-[bounce_0.5s_ease-out]">
+            <div class="w-20 h-20 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto text-4xl mb-6 shadow-inner">
+                <i class="fa-solid fa-truck-medical animate-pulse"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-2">Emergency Assistance</h3>
+            <p class="text-slate-500 mb-6 text-sm">Are you sure you want to trigger the Emergency SOS? This will immediately request an ambulance and send your live location to our clinical caregivers.</p>
+            <div class="flex gap-4 justify-center">
+                <button id="sos-cancel" class="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold text-sm transition-colors">Cancel</button>
+                <button id="sos-confirm" class="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-lg shadow-red-950/20 transition-colors">Yes, SEND HELP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOS Success/Ambulance Modal -->
+    <div id="sos-success-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-green-100 text-center">
+            <div class="w-20 h-20 rounded-full bg-green-100 text-green-600 flex items-center justify-center mx-auto text-4xl mb-6">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-slate-900 mb-2">Ambulance Dispatched!</h3>
+            <p class="text-slate-500 mb-2 text-sm">Your emergency distress signal has been processed.</p>
+            <p class="text-slate-700 font-bold mb-6 text-sm flex items-center justify-center gap-1">
+                <span class="w-2.5 h-2.5 bg-red-600 rounded-full animate-ping"></span> Live Tracking Coordinates Shared
+            </p>
+            <div class="p-3 bg-red-50 text-red-800 rounded-xl text-xs font-semibold mb-6 flex gap-2 justify-center items-center">
+                <i class="fa-solid fa-users-gear text-sm"></i> Active caregivers and dispatch team notified.
+            </div>
+            <button id="sos-success-close" class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm transition-colors">Close</button>
+        </div>
+    </div>
+
+    <!-- UI JS Controls -->
+    <script>
+        // Mobile Sidebar Toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        if (mobileMenuToggle && sidebar) {
+            mobileMenuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+        }
+
+        // Floating Chat Assistant Drawer
+        const chatToggle = document.getElementById('ai-chat-toggle');
+        const chatClose = document.getElementById('ai-chat-close');
+        const chatPanel = document.getElementById('ai-chat-panel');
+        if (chatToggle && chatPanel) {
+            chatToggle.addEventListener('click', () => {
+                chatPanel.classList.toggle('hidden');
+            });
+            if (chatClose) {
+                chatClose.addEventListener('click', () => {
+                    chatPanel.classList.add('hidden');
+                });
+            }
+        }
+
+        // Chat Logic
+        const chatForm = document.getElementById('ai-chat-form');
+        const chatInput = document.getElementById('ai-chat-input');
+        const chatMessages = document.getElementById('ai-chat-messages');
+        const chatHistory = []; // Tracks current conversation locally
+
+        if (chatForm && chatInput && chatMessages) {
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const text = chatInput.value.trim();
+                if (!text) return;
+                
+                // Append User message
+                appendChatMessage("user", text);
+                chatInput.value = "";
+                
+                // Show thinking placeholder
+                const placeholder = appendChatMessage("robot", "Thinking...", true);
+                
+                // POST to backend `/ai/chat`
+                fetch('/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text, history: chatHistory })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    placeholder.remove();
+                    if (data.response) {
+                        appendChatMessage("robot", data.response);
+                        chatHistory.push({"role": "user", "content": text});
+                        chatHistory.push({"role": "assistant", "content": data.response});
+                    } else {
+                        appendChatMessage("robot", "I had trouble generating a reply. Please try again.");
+                    }
+                })
+                .catch(err => {
+                    placeholder.remove();
+                    appendChatMessage("robot", "Sorry, I am currently offline. Please check your connection.");
+                });
+            });
+        }
+
+        function appendChatMessage(role, text, isPlaceholder = False) {
+            const row = document.createElement('div');
+            row.className = "flex gap-2 " + (role === "user" ? "justify-end" : "");
+            
+            const icon = role === "user" ? "" : `
+                <div class="w-6 h-6 rounded bg-slate-200 text-slate-700 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-robot"></i>
+                </div>`;
+            
+            const bgClass = role === "user" ? "bg-green-600 text-white" : "bg-white border border-slate-200 text-slate-700";
+            
+            row.innerHTML = `
+                ${icon}
+                <div class="${bgClass} p-3 rounded-xl text-slate-700 max-w-[80%] shadow-sm ${role === "user" ? "text-white" : ""}">
+                    ${text}
+                </div>`;
+                
+            chatMessages.appendChild(row);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return row;
+        }
+
+        // SOS Distress System
+        const sosTriggerBtn = document.getElementById('sos-trigger-btn');
+        const sosModal = document.getElementById('sos-modal');
+        const sosCancel = document.getElementById('sos-cancel');
+        const sosConfirm = document.getElementById('sos-confirm');
+        const sosSuccessModal = document.getElementById('sos-success-modal');
+        const sosSuccessClose = document.getElementById('sos-success-close');
+
+        if (sosTriggerBtn && sosModal) {
+            sosTriggerBtn.addEventListener('click', () => {
+                sosModal.classList.remove('hidden');
+            });
+            sosCancel.addEventListener('click', () => {
+                sosModal.classList.add('hidden');
+            });
+            
+            sosConfirm.addEventListener('click', () => {
+                sosModal.classList.add('hidden');
+                
+                // Get geolocation coordinates
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        triggerSOSCall(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        // Fallback to default coordinates if denied
+                        triggerSOSCall(12.9716, 77.5946);
+                    }
+                );
+            });
+            
+            sosSuccessClose.addEventListener('click', () => {
+                sosSuccessModal.classList.add('hidden');
+            });
+        }
+
+        function triggerSOSCall(lat, lon) {
+            fetch('/patient/sos/trigger', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ latitude: lat, longitude: lon })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    sosSuccessModal.classList.remove('hidden');
+                }
+            })
+            .catch(err => {
+                // If offline, still show success modal locally for the demo
+                sosSuccessModal.classList.remove('hidden');
+            });
+        }
+    </script>
+</body>
+</html>

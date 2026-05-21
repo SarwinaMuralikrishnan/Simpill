@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full space-y-8 animate-[fadeIn_0.5s_ease-out]">
+    
+    <!-- Header Card -->
+    <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-green-50/50 to-transparent pointer-events-none"></div>
+        <div class="relative z-10">
+            <span class="text-green-600 font-bold text-xs uppercase tracking-widest">PRESCRIPTION DESK</span>
+            <h1 class="text-3xl font-bold text-slate-900 mt-1">Prescribe: {{ patient.user.name }}</h1>
+            <p class="text-slate-400 text-sm mt-1">Create medication schedules and automatically configure patient reminder timelines.</p>
+        </div>
+        <div class="relative z-10 shrink-0">
+            <a href="{{ url_for('doctor.patient_detail', patient_id=patient.id) }}" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-3 rounded-2xl text-xs font-bold transition-colors">
+                &larr; Back to Patient Folder
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Prescribing Form (Left 2 Cols) -->
+        <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                    <i class="fa-solid fa-file-medical"></i>
+                </div>
+                Write Treatment Script
+            </h3>
+
+            <form method="POST" action="" class="space-y-6">
+                {{ form.hidden_tag() }}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Medicine Name -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="medicine_name">Medicine Name</label>
+                        {{ form.medicine_name(class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none", placeholder="e.g. Paracetamol") }}
+                        {% for error in form.medicine_name.errors %}
+                            <span class="text-xs text-red-500 font-semibold mt-1 block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Dosage -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="dosage">Dosage strength</label>
+                        {{ form.dosage(class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all focus:outline-none", placeholder="e.g. 500mg, 10ml, 1 tablet") }}
+                        {% for error in form.dosage.errors %}
+                            <span class="text-xs text-red-500 font-semibold mt-1 block">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Timing -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="timing">Meal Coordination Timing</label>
+                        <div class="relative">
+                            {{ form.timing(class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all appearance-none cursor-pointer focus:outline-none") }}
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                <i class="fa-solid fa-chevron-down text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reminders / Day -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="reminders">Daily Dose Frequency</label>
+                        <div class="relative">
+                            {{ form.reminders(class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all appearance-none cursor-pointer focus:outline-none") }}
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                                <i class="fa-solid fa-chevron-down text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Duration -->
+                <div class="w-full md:w-1/2">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2" for="duration">Treatment Duration</label>
+                    <div class="relative">
+                        {{ form.duration(class="w-full px-4 py-3 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:bg-white transition-all appearance-none cursor-pointer focus:outline-none") }}
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                {{ form.submit(class="w-full py-4 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-sm shadow-lg shadow-green-950/20 hover:shadow-xl transition-all cursor-pointer") }}
+            </form>
+        </div>
+
+        <!-- AI Assistant Column (Right 1 Col) -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 h-fit space-y-6">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                AI OCR Scan Assistant
+            </h3>
+            
+            <p class="text-xs text-slate-400 font-medium">Upload a scan of a handwritten prescription slip. Our clinical OCR parser will extract medicines to pre-populate fields.</p>
+
+            <!-- Drop Zone for OCR -->
+            <div id="ocr-dropzone" class="border-2 border-dashed border-slate-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:border-green-400 bg-slate-50 transition-all select-none relative">
+                <i class="fa-solid fa-file-medical text-slate-350 text-3xl mb-2" id="ocr-icon"></i>
+                <span class="text-xs font-bold text-slate-600" id="ocr-text">Scan handwritten prescription</span>
+                <span class="text-[10px] text-slate-400 mt-1">Image upload (JPG / PNG)</span>
+                <input type="file" id="ocr-file-input" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" accept="image/*">
+            </div>
+
+            <!-- OCR Spinner / Scanning -->
+            <div id="ocr-loading" class="hidden flex flex-col items-center justify-center py-6 gap-2">
+                <div class="w-8 h-8 rounded-full border-4 border-slate-100 border-t-green-600 animate-spin"></div>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Extracting formulas...</p>
+            </div>
+
+            <!-- Scanned items result list -->
+            <div id="ocr-results" class="hidden space-y-3">
+                <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Extracted Formulae</h4>
+                <div id="ocr-list-container" class="space-y-2"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const ocrInput = document.getElementById('ocr-file-input');
+    const ocrDropzone = document.getElementById('ocr-dropzone');
+    const ocrIcon = document.getElementById('ocr-icon');
+    const ocrText = document.getElementById('ocr-text');
+    const ocrLoading = document.getElementById('ocr-loading');
+    const ocrResults = document.getElementById('ocr-results');
+    const ocrList = document.getElementById('ocr-list-container');
+
+    // Forms element bindings
+    const fName = document.getElementById('medicine_name');
+    const fDosage = document.getElementById('dosage');
+    const fTiming = document.getElementById('timing');
+    const fDuration = document.getElementById('duration');
+    const fReminders = document.getElementById('reminders');
+
+    if (ocrInput) {
+        ocrInput.addEventListener('change', () => {
+            if (ocrInput.files && ocrInput.files[0]) {
+                const file = ocrInput.files[0];
+                ocrText.textContent = "Uploading: " + (file.name.length > 20 ? file.name.substring(0, 17) + "..." : file.name);
+                ocrIcon.className = "fa-solid fa-file-circle-check text-green-600 text-3xl mb-2";
+                ocrDropzone.classList.add('bg-green-50/20', 'border-green-400');
+                
+                triggerOCRAnalysis(file);
+            }
+        });
+    }
+
+    function triggerOCRAnalysis(file) {
+        ocrLoading.classList.remove('hidden');
+        ocrResults.classList.add('hidden');
+        ocrList.innerHTML = "";
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/ai/ocr', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            ocrLoading.classList.add('hidden');
+            if (data.success && data.medicines && data.medicines.length > 0) {
+                ocrResults.classList.remove('hidden');
+                
+                data.medicines.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.type = "button";
+                    btn.className = "w-full text-left p-3.5 rounded-xl border border-slate-200 hover:border-green-400 hover:bg-green-50/15 transition-all text-xs space-y-1 block";
+                    btn.onclick = () => applyOcrFields(item);
+                    
+                    // Render reminders text
+                    let remText = "1 (Morning)";
+                    if (item.reminders == 2) remText = "2 (Morning, Night)";
+                    else if (item.reminders == 3) remText = "3 (Morning, Afternoon, Night)";
+
+                    btn.innerHTML = `
+                        <div class="flex justify-between items-center font-bold text-slate-900">
+                            <span>${item.medicine_name}</span>
+                            <span class="bg-slate-100 text-slate-500 text-[9px] font-normal px-1.5 py-0.5 rounded">${item.dosage}</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400 font-semibold flex justify-between">
+                            <span>Timing: ${item.timing}</span>
+                            <span class="text-green-600 font-bold">${item.duration}</span>
+                        </div>
+                        <span class="text-[9px] text-slate-400 block font-semibold border-t border-slate-100/50 pt-1 mt-1"><i class="fa-solid fa-clock"></i> ${remText}</span>
+                    `;
+                    ocrList.appendChild(btn);
+                });
+            } else {
+                alert("AI OCR scanned text, but could not detect readable medical structures. Please enter manually.");
+            }
+        })
+        .catch(err => {
+            ocrLoading.classList.add('hidden');
+            alert("OCR server connection error. Standard clinical regulations applied.");
+        });
+    }
+
+    function applyOcrFields(item) {
+        // Auto fill form fields
+        fName.value = item.medicine_name;
+        fDosage.value = item.dosage;
+        fTiming.value = item.timing;
+        
+        // Find match inside selects for duration
+        // Durations are listed in WTForms choices as '1', '3', '5', '7', '10', '14', '30'
+        // OCR returns e.g. "5 days" or "7 days". Strip non-digit characters.
+        const durationDays = item.duration.replace(/\D/g, '');
+        const durationSelectOptions = Array.from(fDuration.options).map(o => o.value);
+        if (durationSelectOptions.includes(durationDays)) {
+            fDuration.value = durationDays;
+        } else {
+            fDuration.value = '7'; // fallback default
+        }
+
+        // Reminders are choices: '1', '2', '3'
+        const remVal = String(item.reminders);
+        if (['1', '2', '3'].includes(remVal)) {
+            fReminders.value = remVal;
+        } else {
+            fReminders.value = '2'; // fallback default
+        }
+
+        // Visual flash overlay to show autofilled fields
+        [fName, fDosage, fTiming, fDuration, fReminders].forEach(input => {
+            input.classList.add('ring-2', 'ring-green-500', 'ring-opacity-50');
+            setTimeout(() => {
+                input.classList.remove('ring-2', 'ring-green-500', 'ring-opacity-50');
+            }, 1000);
+        });
+    }
+</script>
+{% endblock %}
