@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}{{ current_user.role }} Dashboard – SimPill{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Sidebar Profile Card -->
+        <div class="col-md-4 mb-4">
+            <div class="glass-card p-4 text-center">
+                <div class="position-relative d-inline-block mb-3">
+                    <div class="bg-gradient-teal-blue rounded-circle p-1 d-inline-block">
+                        <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                            <i class="bi bi-person text-gradient-cyan-teal" style="font-size: 3rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <h4 class="text-white fw-bold mb-1">{{ current_user.full_name }}</h4>
+                <p class="text-secondary mb-3">
+                    <span class="badge badge-role badge-role-{{ current_user.role | lower }}">{{ current_user.role }}</span>
+                </p>
+                <hr class="border-secondary border-opacity-25 my-3">
+                <div class="text-start">
+                    <div class="mb-2 small">
+                        <span class="text-secondary d-block">Email Address</span>
+                        <span class="text-white fw-medium">{{ current_user.email }}</span>
+                    </div>
+                    <div class="mb-2 small">
+                        <span class="text-secondary d-block">Phone Number</span>
+                        <span class="text-white fw-medium">{{ current_user.phone }}</span>
+                    </div>
+                    <div class="small">
+                        <span class="text-secondary d-block">Member Since</span>
+                        <span class="text-white fw-medium">{{ current_user.created_at }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Role-Specific Action Module -->
+        <div class="col-md-8">
+            <div class="glass-card p-5 h-100">
+                <h3 class="text-white fw-bold mb-4">
+                    <i class="bi bi-grid-1x2-fill text-gradient-cyan-teal me-2"></i>
+                    {{ current_user.role }} Control Panel
+                </h3>
+                
+                <div class="p-4 bg-secondary bg-opacity-10 rounded-3 border border-secondary border-opacity-10 mb-4">
+                    <h5 class="text-white mb-2">SimPill Smart Assistant</h5>
+                    <p class="text-secondary mb-0 small">
+                        Welcome back! The SimPill AI Engine is actively processing records. Since your role is <strong>{{ current_user.role }}</strong>, you have been routed to this designated panel.
+                    </p>
+                </div>
+
+                <!-- Custom widgets depending on user role -->
+                {% if current_user.role == 'Patient' %}
+                    <h5 class="text-white mb-3">My Health Center</h5>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-info"><i class="bi bi-file-earmark-medical me-1"></i> Active Prescriptions</h6>
+                                <p class="text-secondary small mb-0">No active prescriptions available.</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-success"><i class="bi bi-calendar-check me-1"></i> Appointments</h6>
+                                <p class="text-secondary small mb-0">No upcoming clinic appointments scheduled.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% elif current_user.role == 'Doctor' %}
+                    <h5 class="text-white mb-3">Medical Operations</h5>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-cyan"><i class="bi bi-people-fill me-1"></i> Assigned Patients</h6>
+                                <p class="text-secondary small mb-0">0 active patients assigned to your care.</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-warning"><i class="bi bi-capsule me-1"></i> Prescribe Medicine</h6>
+                                <p class="text-secondary small mb-0">Launch medicine prescription compiler.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% elif current_user.role == 'Receptionist' %}
+                    <h5 class="text-white mb-3">Front Desk Portal</h5>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-info"><i class="bi bi-calendar-plus me-1"></i> Appointment Book</h6>
+                                <p class="text-secondary small mb-0">Click to schedule new consultations.</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-success"><i class="bi bi-person-lines-fill me-1"></i> Queue Status</h6>
+                                <p class="text-secondary small mb-0">0 patients currently checked-in.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% elif current_user.role == 'Lab Technician' %}
+                    <h5 class="text-white mb-3">Diagnostic Laboratory</h5>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-warning"><i class="bi bi-file-earmark-bar-graph me-1"></i> Lab Requests</h6>
+                                <p class="text-secondary small mb-0">0 pending laboratory analyses.</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-cyan"><i class="bi bi-cloud-arrow-up me-1"></i> Upload Reports</h6>
+                                <p class="text-secondary small mb-0">Submit new lab results to doctor review.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% elif current_user.role == 'Pharmacist' %}
+                    <h5 class="text-white mb-3">Medicine Dispensary</h5>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-success"><i class="bi bi-prescription2 me-1"></i> Pending Dispenses</h6>
+                                <p class="text-secondary small mb-0">0 prescriptions waiting to be prepared.</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-info"><i class="bi bi-clipboard-data me-1"></i> Drug Stock</h6>
+                                <p class="text-secondary small mb-0">View pill stock and expiration alerts.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% elif current_user.role == 'Cashier' %}
+                    <h5 class="text-white mb-3">Billing and Checkout</h5>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-success"><i class="bi bi-currency-dollar me-1"></i> Open Invoices</h6>
+                                <p class="text-secondary small mb-0">0 patients pending payment checkout.</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-dark bg-opacity-40 border border-secondary border-opacity-25 rounded-3">
+                                <h6 class="text-info"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Transaction Log</h6>
+                                <p class="text-secondary small mb-0">Generate financial check reports.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

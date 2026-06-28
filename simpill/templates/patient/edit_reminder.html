@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Reminder – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link">
+                    <i class="bi bi-person"></i> Patient Portal
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('reminders_dashboard') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-capsule-pill"></i> Medicine Reminders
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <div class="mb-4">
+            <a href="{{ url_for('reminders_dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to Reminders Console
+            </a>
+            <h2 class="text-white fw-bold mt-2">Edit Medicine Reminder</h2>
+            <p class="text-secondary">Update schedule, dosage, or name for this active reminder.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-8 col-lg-10">
+                <div class="glass-card p-5">
+                    <form action="{{ url_for('edit_patient_reminder', reminder_id=reminder.id) }}" method="POST">
+                        <!-- Medicine Name -->
+                        <div class="mb-3">
+                            <label for="medicine_name" class="form-label text-secondary small fw-medium">Medicine Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-capsule"></i>
+                                </span>
+                                <input type="text" class="form-control form-simpill-control" id="medicine_name" name="medicine_name" value="{{ reminder.medicine_name }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Dosage Amount -->
+                        <div class="mb-3">
+                            <label for="dosage" class="form-label text-secondary small fw-medium">Dosage Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-calculator"></i>
+                                </span>
+                                <input type="text" class="form-control form-simpill-control" id="dosage" name="dosage" value="{{ reminder.dosage }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Reminding Category -->
+                        <div class="mb-4">
+                            <label for="category" class="form-label text-secondary small fw-medium">Reminding Category</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-clock-history"></i>
+                                </span>
+                                <select class="form-select form-simpill-control form-simpill-select" id="category" name="category" required>
+                                    <option value="Morning - Before Food" {% if reminder.category == 'Morning - Before Food' %}selected{% endif %}>Morning - Before Food</option>
+                                    <option value="Morning - After Food" {% if reminder.category == 'Morning - After Food' %}selected{% endif %}>Morning - After Food</option>
+                                    <option value="Afternoon - Before Food" {% if reminder.category == 'Afternoon - Before Food' %}selected{% endif %}>Afternoon - Before Food</option>
+                                    <option value="Afternoon - After Food" {% if reminder.category == 'Afternoon - After Food' %}selected{% endif %}>Afternoon - After Food</option>
+                                    <option value="Night - Before Food" {% if reminder.category == 'Night - Before Food' %}selected{% endif %}>Night - Before Food</option>
+                                    <option value="Night - After Food" {% if reminder.category == 'Night - After Food' %}selected{% endif %}>Night - After Food</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-end gap-3 mt-2">
+                            <a href="{{ url_for('reminders_dashboard') }}" class="btn btn-simpill btn-simpill-outline">Cancel</a>
+                            <button type="submit" class="btn btn-simpill btn-simpill-primary">
+                                Save Changes <i class="bi bi-check-circle ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}AI Health Summary – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-file-earmark-medical-fill"></i> Health Summary
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <!-- Back Link & Header -->
+        <div class="mb-4">
+            <a href="{{ url_for('dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <h2 class="text-white fw-bold mt-2">AI Consolidated Patient Summary</h2>
+            <p class="text-secondary">Synthesizes subjective symptoms, diagnostic findings, vital signs, and pharmacotherapy.</p>
+            <span class="text-secondary small d-block" style="font-size: 0.75rem;">Subject patient: <strong class="text-white">{{ patient.full_name }}</strong> (ID: PAT-{{ "%04d"|format(patient.id) }})</span>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-8 col-lg-10">
+                <!-- AI Consolidated Report Sheet -->
+                <div class="glass-card p-5 border border-info border-opacity-10 position-relative overflow-hidden">
+                    <!-- Tech watermark overlay -->
+                    <div class="position-absolute" style="right: -40px; top: -40px; opacity: 0.03; font-size: 15rem; color: #fff; pointer-events: none;">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+
+                    <!-- Header branding -->
+                    <div class="d-flex justify-content-between align-items-center mb-5 pb-3 border-bottom border-secondary border-opacity-10">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-gradient-teal-blue rounded-circle p-1 d-inline-block me-3">
+                                <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                                    <i class="bi bi-heart-pulse-fill text-gradient-cyan-teal fs-4"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-white fw-bold mb-0">SimPill Clinical AI</h4>
+                                <span class="text-secondary small" style="font-size: 0.75rem;">Diagnostics Report Compiler</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 px-3 py-1.5 fw-bold small">CONSOLIDATED</span>
+                        </div>
+                    </div>
+
+                    <!-- Summary Content Renders Markdown Styling -->
+                    <div class="clinical-ai-summary text-white small" style="line-height: 1.8; letter-spacing: 0.3px;">
+                        <!-- Custom CSS rules inside the template block to format headers and lists of generated markdown -->
+                        <style>
+                        .clinical-ai-summary h3 {
+                            color: #0dd5c2;
+                            font-size: 1.1rem;
+                            font-weight: 700;
+                            margin-top: 2rem;
+                            margin-bottom: 0.8rem;
+                            border-left: 3px solid #0dd5c2;
+                            padding-left: 10px;
+                        }
+                        .clinical-ai-summary p {
+                            color: rgba(255,255,255,0.85);
+                            margin-bottom: 1.2rem;
+                        }
+                        .clinical-ai-summary ul {
+                            padding-left: 20px;
+                            margin-bottom: 1.2rem;
+                            color: rgba(255,255,255,0.85);
+                        }
+                        .clinical-ai-summary li {
+                            margin-bottom: 0.5rem;
+                        }
+                        .clinical-ai-summary li strong {
+                            color: #fff;
+                        }
+                        </style>
+
+                        <!-- Renders HTML format of compiled report -->
+                        <!-- The Python helper generates markdown string with h3 and bullet points -->
+                        {% for line in summary_md.split('\n') %}
+                            {% if line.startswith('###') %}
+                                <h3>{{ line.replace('###', '').strip() }}</h3>
+                            {% elif line.startswith('*') or line.startswith('-') %}
+                                <ul>
+                                    <!-- Parse bold elements in checklist items -->
+                                    <li>
+                                        {% set clean_line = line[1:].strip() %}
+                                        {% if '**' in clean_line %}
+                                            {% set parts = clean_line.split('**') %}
+                                            <strong>{{ parts[1] }}</strong>{{ parts[2:] | join('') }}
+                                        {% else %}
+                                            {{ clean_line }}
+                                        {% endif %}
+                                    </li>
+                                </ul>
+                            {% elif line.strip().startswith('1.') or line.strip().startswith('2.') or line.strip().startswith('3.') %}
+                                <ul>
+                                    <li>
+                                        {% set clean_line = line.strip()[2:].strip() %}
+                                        {% if '**' in clean_line %}
+                                            {% set parts = clean_line.split('**') %}
+                                            <strong>{{ parts[1] }}</strong>{{ parts[2:] | join('') }}
+                                        {% else %}
+                                            {{ clean_line }}
+                                        {% endif %}
+                                    </li>
+                                </ul>
+                            {% elif line.strip() != "" %}
+                                <p>{{ line }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Disclaimer -->
+                    <div class="mt-5 pt-4 border-top border-secondary border-opacity-10 text-center text-secondary small" style="font-size: 0.75rem;">
+                        <p class="mb-0"><i class="bi bi-shield-exclamation text-warning me-1"></i> <strong>Disclaimer:</strong> This health summary is synthetically compiled by SimPill Diagnostic AI using actual clinical records logs. Final medical assessments must be confirmed by a licensed clinician.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

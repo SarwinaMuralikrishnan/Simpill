@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Stock Item – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-capsule"></i> Pharmacy Console
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <div class="mb-4">
+            <a href="{{ url_for('dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to Pharmacy Console
+            </a>
+            <h2 class="text-white fw-bold mt-2">Edit Stock Item</h2>
+            <p class="text-secondary">Modify medicine parameters, stock quantities, and prices.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-8 col-lg-10">
+                <div class="glass-card p-5">
+                    <form action="{{ url_for('edit_medicine', medicine_id=medicine.id) }}" method="POST">
+                        <!-- Medicine Name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label text-secondary small fw-medium">Medicine Name & Strength</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-capsule"></i>
+                                </span>
+                                <input type="text" class="form-control form-simpill-control" id="name" name="name" value="{{ medicine.name }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Stock Quantity -->
+                            <div class="col-md-6 mb-3">
+                                <label for="quantity" class="form-label text-secondary small fw-medium">Current Stock Quantity (Units)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-box"></i>
+                                    </span>
+                                    <input type="number" class="form-control form-simpill-control" id="quantity" name="quantity" value="{{ medicine.quantity }}" min="0" required>
+                                </div>
+                            </div>
+
+                            <!-- Unit Price -->
+                            <div class="col-md-6 mb-3">
+                                <label for="price" class="form-label text-secondary small fw-medium">Unit Price ($)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </span>
+                                    <input type="number" step="0.01" class="form-control form-simpill-control" id="price" name="price" value="{{ medicine.price }}" min="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expiry Date -->
+                        <div class="mb-4">
+                            <label for="expiry_date" class="form-label text-secondary small fw-medium">Expiry Date</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-calendar-event"></i>
+                                </span>
+                                <input type="date" class="form-control form-simpill-control" id="expiry_date" name="expiry_date" value="{{ medicine.expiry_date }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-end gap-3 mt-2">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-simpill btn-simpill-outline">Cancel</a>
+                            <button type="submit" class="btn btn-simpill btn-simpill-primary">
+                                Save Changes <i class="bi bi-check-circle ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

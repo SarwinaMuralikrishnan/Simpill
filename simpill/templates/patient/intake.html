@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Medical Intake Form – SimPill{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <a href="{{ url_for('dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+                <h2 class="text-white fw-bold mt-2">Medical Intake Questionnaire</h2>
+                <p class="text-secondary">Please complete this questionnaire to prepare for your consultation.</p>
+            </div>
+
+            <div class="glass-card p-5">
+                <form action="{{ url_for('patient_intake') }}" method="POST">
+                    <!-- Diagnosing Doctor -->
+                    <div class="mb-3">
+                        <label for="diagnosing_doctor" class="form-label text-secondary small fw-medium">Consulting / Diagnosing Doctor</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                <i class="bi bi-person-badge"></i>
+                            </span>
+                            <input type="text" class="form-control form-simpill-control" id="diagnosing_doctor" name="diagnosing_doctor" 
+                                   placeholder="Dr. Gregory House" required>
+                        </div>
+                    </div>
+
+                    <!-- Symptoms -->
+                    <div class="mb-3">
+                        <label for="symptoms" class="form-label text-secondary small fw-medium">Symptoms Experienced</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                <i class="bi bi-activity"></i>
+                            </span>
+                            <textarea class="form-control form-simpill-control" id="symptoms" name="symptoms" rows="3" 
+                                      placeholder="List any physical symptoms you are currently experiencing (e.g. constant headache, back pain, chest tightness)" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Health Problems -->
+                    <div class="mb-3">
+                        <label for="health_problems" class="form-label text-secondary small fw-medium">Existing Health Problems / History</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </span>
+                            <textarea class="form-control form-simpill-control" id="health_problems" name="health_problems" rows="3" 
+                                      placeholder="Specify chronic health conditions or family history (e.g. hypertension, diabetes, drug allergies)" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Treatment Needs -->
+                    <div class="mb-4">
+                        <label for="treatment_needs" class="form-label text-secondary small fw-medium">Treatment Needs & Goals</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                <i class="bi bi-heart"></i>
+                            </span>
+                            <textarea class="form-control form-simpill-control" id="treatment_needs" name="treatment_needs" rows="3" 
+                                      placeholder="What are your goals for this consult? (e.g. prescription refill, diagnostic lab order, general physical)" required></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex justify-content-end gap-3 mt-3">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-simpill btn-simpill-outline">Cancel</a>
+                        <button type="submit" class="btn btn-simpill btn-simpill-primary">
+                            Submit Form <i class="bi bi-send-check ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

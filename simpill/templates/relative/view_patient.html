@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Records for {{ patient.full_name }} – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-people-fill"></i> Relative Console
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <!-- Back Link & Header -->
+        <div class="mb-4">
+            <a href="{{ url_for('dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to Console
+            </a>
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mt-2 gap-3">
+                <div>
+                    <h2 class="text-white fw-bold mb-1">Health Records: {{ patient.full_name }}</h2>
+                    <p class="text-secondary mb-0">Authorized Relationship: <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-20 px-2.5">{{ relation.relationship }}</span> (Read-only access)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 1: Profile Details & Vitals -->
+        <div class="row g-4 mb-4">
+            <!-- Profile Info Card -->
+            <div class="col-lg-5">
+                <div class="glass-card p-4 h-100">
+                    <h5 class="text-white fw-bold mb-4">
+                        <i class="bi bi-person-badge text-gradient-cyan-teal me-2"></i> Patient Information
+                    </h5>
+                    <div class="list-group list-group-flush bg-transparent">
+                        <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-2.5 px-0 d-flex justify-content-between">
+                            <span class="text-secondary small">Email Address</span>
+                            <span class="text-white small fw-medium">{{ patient.email }}</span>
+                        </div>
+                        <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-2.5 px-0 d-flex justify-content-between">
+                            <span class="text-secondary small">Contact Phone</span>
+                            <span class="text-white small fw-medium">{{ patient.phone or 'Not provided' }}</span>
+                        </div>
+                        <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-2.5 px-0 d-flex justify-content-between">
+                            <span class="text-secondary small">Date of Birth</span>
+                            <span class="text-white small fw-medium">{% if profile %}{{ profile.dob or 'Not set' }}{% else %}Not set{% endif %}</span>
+                        </div>
+                        <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-2.5 px-0 d-flex justify-content-between">
+                            <span class="text-secondary small">Blood Group</span>
+                            <span class="text-white small fw-medium">{% if profile %}{{ profile.blood_group or 'Not set' }}{% else %}Not set{% endif %}</span>
+                        </div>
+                        <div class="list-group-item bg-transparent border-bottom-0 py-2.5 px-0">
+                            <span class="text-secondary small d-block mb-1">Residential Address</span>
+                            <span class="text-white small fw-normal d-block">{% if profile %}{{ profile.address or 'Not set' }}{% else %}Not set{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vitals History -->
+            <div class="col-lg-7">
+                <div class="glass-card p-4 h-100">
+                    <h5 class="text-white fw-bold mb-4">
+                        <i class="bi bi-activity text-danger me-2"></i> Recorded Clinical Vitals
+                    </h5>
+                    {% if vitals %}
+                        <div class="simpill-table-container">
+                            <table class="table table-simpill mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">B.P.</th>
+                                        <th scope="col">Pulse</th>
+                                        <th scope="col">Weight</th>
+                                        <th scope="col">Temp</th>
+                                        <th scope="col">SpO2</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for v in vitals %}
+                                        <tr>
+                                            <td class="text-secondary small">{{ v.recorded_at.split(' ')[0] }}</td>
+                                            <td><span class="text-white small fw-medium">{{ v.blood_pressure }}</span></td>
+                                            <td><span class="text-white small fw-medium">{{ v.pulse }} bpm</span></td>
+                                            <td><span class="text-white small fw-medium">{{ v.weight }} kg</span></td>
+                                            <td><span class="text-white small fw-medium">{{ v.temperature }}°C</span></td>
+                                            <td><span class="text-info small fw-bold">{{ v.oxygen_level }}%</span></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-secondary border border-secondary border-opacity-10 rounded-3">
+                            <i class="bi bi-heartbreak fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                            No clinical vitals recorded yet.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Prescriptions & Medicine Schedule -->
+        <div class="row g-4 mb-4">
+            <!-- Left Side: Active Prescriptions -->
+            <div class="col-xl-7">
+                <div class="glass-card p-4 h-100">
+                    <h5 class="text-white fw-bold mb-4">
+                        <i class="bi bi-capsule-pill text-gradient-cyan-teal me-2"></i> Active Prescriptions
+                    </h5>
+                    
+                    {% if prescriptions %}
+                        <div class="simpill-table-container">
+                            <table class="table table-simpill mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Medicine Name</th>
+                                        <th scope="col">Dosage Schedule</th>
+                                        <th scope="col">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pres in prescriptions %}
+                                        <tr>
+                                            <td class="text-secondary small">{{ pres.created_at.split(' ')[0] }}</td>
+                                            <td><span class="text-white fw-bold small">{{ pres.medicine_name }}</span></td>
+                                            <td>
+                                                <span class="text-white small d-block" style="font-size: 0.8rem;">{{ pres.dosage }}</span>
+                                                {% if pres.instructions %}
+                                                    <span class="text-secondary small" style="font-size: 0.75rem; font-style: italic;">Note: {{ pres.instructions }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if pres.status == 'Dispensed' %}
+                                                    <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 px-2 py-0.5 small">Dispensed</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-25 px-2 py-0.5 small">Pending</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 text-secondary border border-secondary border-opacity-10 rounded-3">
+                            <i class="bi bi-journal-x fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                            No prescriptions on file.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right Side: Medicine Schedule Reminders & Adherence (Read-only) -->
+            <div class="col-xl-5">
+                <div class="glass-card p-4 h-100 border border-info border-opacity-10">
+                    <h5 class="text-white fw-bold mb-3">
+                        <i class="bi bi-clock-history text-gradient-cyan-teal me-2"></i> Medicine Schedules & Adherence
+                    </h5>
+
+                    <!-- Stats summaries -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="p-2 bg-secondary bg-opacity-10 rounded-3 text-center border border-secondary border-opacity-10">
+                                <span class="text-secondary small d-block" style="font-size: 0.7rem;">DAILY ADHERENCE</span>
+                                <strong class="text-white small">{{ stats.daily_taken }} of {{ stats.total_reminders }} taken</strong>
+                                <span class="text-info d-block fw-bold small mt-1">{{ stats.daily_adherence }}%</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-secondary bg-opacity-10 rounded-3 text-center border border-secondary border-opacity-10">
+                                <span class="text-secondary small d-block" style="font-size: 0.7rem;">WEEKLY ADHERENCE</span>
+                                <strong class="text-white small">{{ stats.weekly_taken }} of {{ stats.total_possible_weekly }} doses</strong>
+                                <span class="text-info d-block fw-bold small mt-1">{{ stats.weekly_adherence }}%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- checklist logs -->
+                    <h6 class="text-white small fw-bold mb-2">Today's Schedule Checklist</h6>
+                    {% if reminders %}
+                        <div class="list-group list-group-flush bg-transparent" style="max-height: 250px; overflow-y: auto;">
+                            {% for rem in reminders %}
+                                <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="text-secondary small d-block" style="font-size: 0.7rem;"><i class="bi bi-clock me-1"></i> {{ rem.category }}</span>
+                                        <strong class="text-white small">{{ rem.medicine_name }}</strong>
+                                        <span class="text-secondary d-block small" style="font-size: 0.75rem;">Qty: {{ rem.dosage }}</span>
+                                    </div>
+                                    <div>
+                                        {% if rem.taken %}
+                                            <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-20 px-2 py-1 small">
+                                                <i class="bi bi-check-lg"></i> Taken
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-20 px-2 py-1 small">
+                                                <i class="bi bi-hourglass-split"></i> Pending
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <span class="text-secondary small italic d-block py-4 text-center border border-secondary border-opacity-10 rounded-3">No reminders configured.</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: Diagnostic Lab Reports -->
+        <div class="glass-card p-4">
+            <h5 class="text-white fw-bold mb-4">
+                <i class="bi bi-file-earmark-medical-fill text-gradient-cyan-teal me-2"></i> Uploaded Diagnostics & Lab Reports
+            </h5>
+            
+            {% if reports %}
+                <div class="simpill-table-container">
+                    <table class="table table-simpill mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Upload Date</th>
+                                <th scope="col">Report Title</th>
+                                <th scope="col">Description Notes</th>
+                                <th scope="col" style="width: 150px; text-align: center;">View Document</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for report in reports %}
+                                <tr>
+                                    <td class="text-secondary small">{{ report.uploaded_at }}</td>
+                                    <td><strong class="text-white">{{ report.report_type }}</strong></td>
+                                    <td><span class="text-secondary small">{{ report.description or 'No comments' }}</span></td>
+                                    <td class="text-center">
+                                        <a href="{{ url_for('view_medical_report_ocr', report_id=report.id) }}" target="_blank" class="btn btn-sm btn-outline-info px-3">
+                                            View Report <i class="bi bi-eye ms-1"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-secondary border border-secondary border-opacity-10 rounded-3">
+                    <i class="bi bi-folder-symlink fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                    No diagnostics reports found.
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

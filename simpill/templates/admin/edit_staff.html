@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User Profile – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('admin_dashboard') }}" class="sidebar-menu-link">
+                    <i class="bi bi-speedometer2"></i> Registry Console
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('add_staff') }}" class="sidebar-menu-link">
+                    <i class="bi bi-person-plus-fill"></i> Add Staff Member
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <div class="mb-4">
+            <a href="{{ url_for('admin_dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to User Registry
+            </a>
+            <h2 class="text-white fw-bold mt-2">Edit User Profile</h2>
+            <p class="text-secondary">Update account information, contact info, and system role for <strong class="text-white">{{ user.full_name }}</strong>.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="glass-card p-5">
+                    <form action="{{ url_for('edit_staff', user_id=user.id) }}" method="POST">
+                        <div class="row">
+                            <!-- Full Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="full_name" class="form-label text-secondary small fw-medium">Full Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <input type="text" class="form-control form-simpill-control" id="full_name" name="full_name" value="{{ user.full_name }}" required>
+                                </div>
+                            </div>
+                            
+                            <!-- Email -->
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label text-secondary small fw-medium">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-envelope"></i>
+                                    </span>
+                                    <input type="email" class="form-control form-simpill-control" id="email" name="email" value="{{ user.email }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Phone -->
+                            <div class="col-md-6 mb-4">
+                                <label for="phone" class="form-label text-secondary small fw-medium">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-telephone"></i>
+                                    </span>
+                                    <input type="tel" class="form-control form-simpill-control" id="phone" name="phone" value="{{ user.phone }}" required>
+                                </div>
+                            </div>
+
+                            <!-- Role Dropdown -->
+                            <div class="col-md-6 mb-4">
+                                <label for="role" class="form-label text-secondary small fw-medium">System Role</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-shield-lock"></i>
+                                    </span>
+                                    <select class="form-select form-simpill-control form-simpill-select" id="role" name="role" required>
+                                        <option value="Doctor" {% if user.role == 'Doctor' %}selected{% endif %}>Doctor</option>
+                                        <option value="Receptionist" {% if user.role == 'Receptionist' %}selected{% endif %}>Receptionist</option>
+                                        <option value="Lab Technician" {% if user.role == 'Lab Technician' %}selected{% endif %}>Lab Technician</option>
+                                        <option value="Pharmacist" {% if user.role == 'Pharmacist' %}selected{% endif %}>Pharmacist</option>
+                                        <option value="Cashier" {% if user.role == 'Cashier' %}selected{% endif %}>Cashier</option>
+                                        <option value="Admin" {% if user.role == 'Admin' %}selected{% endif %}>Admin (Administrator)</option>
+                                        <option value="Patient" {% if user.role == 'Patient' %}selected{% endif %}>Patient</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-end gap-3 mt-3">
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-simpill btn-simpill-outline">Cancel</a>
+                            <button type="submit" class="btn btn-simpill btn-simpill-primary">
+                                Save Changes <i class="bi bi-check-circle ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

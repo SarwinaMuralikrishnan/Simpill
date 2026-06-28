@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}View Medical Report – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-file-earmark-medical-fill"></i> Document Viewer
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <!-- Back Link & Header -->
+        <div class="mb-4">
+            <a href="{{ url_for('dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <h2 class="text-white fw-bold mt-2">Medical Report Analyzer</h2>
+            <p class="text-secondary mb-0">Original Uploaded File: <strong>{{ report.file_name }}</strong></p>
+            <span class="text-secondary small d-block" style="font-size: 0.75rem;">Patient owner: <strong class="text-white">{{ patient.full_name }}</strong> | Uploaded: {{ report.uploaded_at }}</span>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Side: Original Document Preview -->
+            <div class="col-lg-6">
+                <div class="glass-card p-4 h-100 border border-secondary border-opacity-10">
+                    <h5 class="text-white fw-bold mb-4">
+                        <i class="bi bi-image text-gradient-cyan-teal me-2"></i> Report Preview
+                    </h5>
+                    
+                    {% set ext = report.file_path.split('.')[-1].lower() %}
+                    <div class="text-center p-2 bg-dark bg-opacity-25 rounded border border-secondary border-opacity-10 d-flex align-items-center justify-content-center" style="min-height: 400px;">
+                        {% if ext in ['png', 'jpg', 'jpeg'] %}
+                            <img src="{{ url_for('static', filename=report.file_path.replace('uploads/', 'uploads/')) }}" class="img-fluid rounded border border-secondary border-opacity-10 shadow" alt="Medical Document" style="max-height: 500px; object-fit: contain;">
+                        {% elif ext == 'pdf' %}
+                            <embed src="{{ url_for('static', filename=report.file_path.replace('uploads/', 'uploads/')) }}" type="application/pdf" width="100%" height="450px" style="border: none;">
+                        {% else %}
+                            <div class="py-5 text-secondary">
+                                <i class="bi bi-file-earmark-arrow-down fs-1 d-block mb-3 text-secondary text-opacity-20"></i>
+                                <p class="mb-3">Preview unavailable for this file extension (.{{ ext }}).</p>
+                                <a href="{{ url_for('static', filename=report.file_path.replace('uploads/', 'uploads/')) }}" class="btn btn-simpill btn-simpill-primary" download>
+                                    Download Document <i class="bi bi-download ms-1"></i>
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: OCR Text Extraction -->
+            <div class="col-lg-6">
+                <div class="glass-card p-4 h-100 border border-info border-opacity-10">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="text-white fw-bold mb-0">
+                            <i class="bi bi-cpu text-info me-2"></i> Tesseract OCR Text Extract
+                        </h5>
+                        <span class="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25 px-2.5 py-1 fw-bold">Live Scan</span>
+                    </div>
+
+                    <p class="text-secondary small mb-3">
+                        The Tesseract engine has processed the report image, extracting structured alphanumeric content dynamically.
+                    </p>
+
+                    <div class="p-3 bg-dark bg-opacity-40 rounded border border-secondary border-opacity-10 text-white font-monospace small" style="white-space: pre-wrap; font-family: monospace; max-height: 420px; overflow-y: auto; line-height: 1.5; letter-spacing: 0.5px;">
+                        {{ extracted_text }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

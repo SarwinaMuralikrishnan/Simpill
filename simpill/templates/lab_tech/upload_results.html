@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Lab Test – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link">
+                    <i class="bi bi-radioactive"></i> Lab Console
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('record_patient_vitals') }}" class="sidebar-menu-link">
+                    <i class="bi bi-heart-pulse"></i> Record Vitals
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('upload_lab_results') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-file-earmark-medical"></i> Upload Lab Test
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <div class="mb-4">
+            <a href="{{ url_for('dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to Lab Console
+            </a>
+            <h2 class="text-white fw-bold mt-2">Upload Lab Test Result</h2>
+            <p class="text-secondary">Input clinical diagnostic laboratory test parameters.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="glass-card p-5">
+                    <form action="{{ url_for('upload_lab_results') }}" method="POST">
+                        <div class="row">
+                            <!-- Select Patient -->
+                            <div class="col-md-12 mb-3">
+                                <label for="patient_id" class="form-label text-secondary small fw-medium">Select Patient</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <select class="form-select form-simpill-control form-simpill-select" id="patient_id" name="patient_id" required>
+                                        <option value="" disabled {% if not request.args.get('patient_id') %}selected{% endif %}>Choose Patient...</option>
+                                        {% for patient in patients %}
+                                            <option value="{{ patient.id }}" {% if request.args.get('patient_id')|int == patient.id %}selected{% endif %}>
+                                                {{ patient.full_name }} ({{ patient.email }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Test Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="test_name" class="form-label text-secondary small fw-medium">Test Parameter / Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-clipboard2-check"></i>
+                                    </span>
+                                    <input type="text" class="form-control form-simpill-control" id="test_name" name="test_name" placeholder="Blood Glucose / Lipid Profile" required>
+                                </div>
+                            </div>
+
+                            <!-- Test Value -->
+                            <div class="col-md-6 mb-3">
+                                <label for="test_value" class="form-label text-secondary small fw-medium">Measured Value</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-graph-up"></i>
+                                    </span>
+                                    <input type="text" class="form-control form-simpill-control" id="test_value" name="test_value" placeholder="95 mg/dL" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Normal Range -->
+                            <div class="col-md-12 mb-3">
+                                <label for="normal_range" class="form-label text-secondary small fw-medium">Reference / Normal Range</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-info-circle"></i>
+                                    </span>
+                                    <input type="text" class="form-control form-simpill-control" id="normal_range" name="normal_range" placeholder="70 - 100 mg/dL" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comments -->
+                        <div class="mb-4">
+                            <label for="comments" class="form-label text-secondary small fw-medium">Technician Comments / Observations</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-chat-left-dots"></i>
+                                </span>
+                                <textarea class="form-control form-simpill-control" id="comments" name="comments" rows="3" placeholder="e.g., Patient was fasting. Value falls in regular reference bounds."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-end gap-3 mt-3">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-simpill btn-simpill-outline">Cancel</a>
+                            <button type="submit" class="btn btn-simpill btn-simpill-primary">
+                                Upload Test Result <i class="bi bi-check-circle ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

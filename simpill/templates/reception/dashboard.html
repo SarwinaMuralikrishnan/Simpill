@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+
+{% block title %}Reception Console – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-calendar-check"></i> Desk Console
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('register_walkin_patient') }}" class="sidebar-menu-link">
+                    <i class="bi bi-person-plus-fill"></i> Register Walk-in
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('schedule_appointment') }}" class="sidebar-menu-link">
+                    <i class="bi bi-clock-history"></i> Schedule Visit
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <span class="badge badge-role badge-role-receptionist mb-2">Reception Desk</span>
+                <h2 class="text-white fw-bold mb-1">Front Desk Operations</h2>
+                <p class="text-secondary mb-0">Today's Date: <strong class="text-info">{{ today_date }}</strong>. Manage check-ins and appointments.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('register_walkin_patient') }}" class="btn btn-simpill btn-simpill-outline d-inline-flex align-items-center">
+                    <i class="bi bi-person-plus me-1"></i> Register Walk-in
+                </a>
+                <a href="{{ url_for('schedule_appointment') }}" class="btn btn-simpill btn-simpill-primary d-inline-flex align-items-center">
+                    <i class="bi bi-calendar-plus me-1"></i> Schedule Visit
+                </a>
+            </div>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="row g-4 mb-4">
+            <!-- Metric 1: Today's Appointments -->
+            <div class="col-md-4">
+                <div class="glass-card stat-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-secondary small d-block">Today's Appointments</span>
+                            <h3 class="text-white fw-bold mt-1 mb-0">{{ today_appointments | length }}</h3>
+                        </div>
+                        <div class="p-2 bg-info bg-opacity-10 text-info rounded-3">
+                            <i class="bi bi-calendar-event fs-4"></i>
+                        </div>
+                    </div>
+                    <span class="text-secondary small">Total slots booked for today</span>
+                </div>
+            </div>
+
+            <!-- Metric 2: Waiting Queue -->
+            <div class="col-md-4">
+                <div class="glass-card stat-card patients p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-secondary small d-block">Waiting Queue</span>
+                            <h3 class="text-white fw-bold mt-1 mb-0">{{ waiting_queue | length }}</h3>
+                        </div>
+                        <div class="p-2 bg-primary bg-opacity-10 text-primary rounded-3">
+                            <i class="bi bi-people-fill fs-4"></i>
+                        </div>
+                    </div>
+                    <span class="text-secondary small">Patients checked-in and waiting</span>
+                </div>
+            </div>
+
+            <!-- Metric 3: Active Doctors -->
+            <div class="col-md-4">
+                <div class="glass-card stat-card doctors p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-secondary small d-block">Doctors in Directory</span>
+                            <h3 class="text-white fw-bold mt-1 mb-0">{{ doctors | length }}</h3>
+                        </div>
+                        <div class="p-2 bg-success bg-opacity-10 text-success rounded-3">
+                            <i class="bi bi-heart-pulse-fill fs-4"></i>
+                        </div>
+                    </div>
+                    <span class="text-secondary small">Assigned physicians</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Console Tabs -->
+        <div class="glass-card p-4">
+            <nav class="mb-4">
+                <div class="nav nav-tabs border-secondary border-opacity-25" id="nav-tab" role="tablist">
+                    <button class="nav-link text-secondary border-0 active" id="nav-schedule-tab" data-bs-toggle="tab" data-bs-target="#nav-schedule" type="button" role="tab" aria-controls="nav-schedule" aria-selected="true">
+                        <i class="bi bi-clock me-1"></i> Today's Schedule
+                    </button>
+                    <button class="nav-link text-secondary border-0" id="nav-queue-tab" data-bs-toggle="tab" data-bs-target="#nav-queue" type="button" role="tab" aria-controls="nav-queue" aria-selected="false">
+                        <i class="bi bi-hourglass-split me-1"></i> Patient Queue ({{ waiting_queue | length }})
+                    </button>
+                    <button class="nav-link text-secondary border-0" id="nav-patients-tab" data-bs-toggle="tab" data-bs-target="#nav-patients" type="button" role="tab" aria-controls="nav-patients" aria-selected="false">
+                        <i class="bi bi-people me-1"></i> Patients Registry ({{ patients | length }})
+                    </button>
+                    <button class="nav-link text-secondary border-0" id="nav-intakes-tab" data-bs-toggle="tab" data-bs-target="#nav-intakes" type="button" role="tab" aria-controls="nav-intakes" aria-selected="false">
+                        <i class="bi bi-file-earmark-medical me-1"></i> Patient Intakes ({{ intakes | length }})
+                    </button>
+                    <button class="nav-link text-secondary border-0" id="nav-doctors-tab" data-bs-toggle="tab" data-bs-target="#nav-doctors" type="button" role="tab" aria-controls="nav-doctors" aria-selected="false">
+                        <i class="bi bi-person-badge-fill me-1"></i> Doctors
+                    </button>
+                </div>
+            </nav>
+
+            <div class="tab-content" id="nav-tabContent">
+                <!-- 1. Today's Appointments Tab -->
+                <div class="tab-pane fade show active" id="nav-schedule" role="tabpanel" aria-labelledby="nav-schedule-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 100px;">Time</th>
+                                    <th scope="col">Patient Name</th>
+                                    <th scope="col">Assigned Doctor</th>
+                                    <th scope="col" style="width: 150px;">Status</th>
+                                    <th scope="col" style="width: 250px; text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if today_appointments %}
+                                    {% for appt in today_appointments %}
+                                        <tr>
+                                            <td><span class="text-white fw-medium">{{ appt.time }}</span></td>
+                                            <td><span class="text-white">{{ appt.patient_name }}</span></td>
+                                            <td><strong class="text-secondary small">{{ appt.doctor_name }}</strong></td>
+                                            <td>
+                                                {% if appt.status == 'Scheduled' %}
+                                                    <span class="badge bg-info bg-opacity-25 border border-info border-opacity-25 text-info">Scheduled</span>
+                                                {% elif appt.status == 'Checked-in' %}
+                                                    <span class="badge bg-warning bg-opacity-25 border border-warning border-opacity-25 text-warning">Checked-in</span>
+                                                {% elif appt.status == 'Completed' %}
+                                                    <span class="badge bg-success bg-opacity-25 border border-success border-opacity-25 text-success">Completed</span>
+                                                {% elif appt.status == 'Cancelled' %}
+                                                    <span class="badge bg-danger bg-opacity-25 border border-danger border-opacity-25 text-danger">Cancelled</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    {% if appt.status == 'Scheduled' %}
+                                                        <a href="{{ url_for('change_appointment_status', app_id=appt.id, status='Checked-in') }}" class="btn btn-sm btn-outline-warning">
+                                                            Check In <i class="bi bi-box-arrow-in-right ms-1"></i>
+                                                        </a>
+                                                        <a href="{{ url_for('change_appointment_status', app_id=appt.id, status='Cancelled') }}" class="btn btn-sm btn-outline-danger">
+                                                            Cancel <i class="bi bi-x-circle ms-1"></i>
+                                                        </a>
+                                                    {% elif appt.status == 'Checked-in' %}
+                                                        <a href="{{ url_for('change_appointment_status', app_id=appt.id, status='Completed') }}" class="btn btn-sm btn-outline-success">
+                                                            Complete <i class="bi bi-check2-circle ms-1"></i>
+                                                        </a>
+                                                        <a href="{{ url_for('change_appointment_status', app_id=appt.id, status='Cancelled') }}" class="btn btn-sm btn-outline-danger">
+                                                            Cancel <i class="bi bi-x-circle ms-1"></i>
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="text-secondary small italic">No actions available</span>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-calendar-x fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            No appointments booked for today.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 2. Patient Queue Tab -->
+                <div class="tab-pane fade" id="nav-queue" role="tabpanel" aria-labelledby="nav-queue-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 100px;">Time</th>
+                                    <th scope="col">Patient Name</th>
+                                    <th scope="col">Assigned Doctor</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col" style="text-align: center; width: 180px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if waiting_queue %}
+                                    {% for appt in waiting_queue %}
+                                        <tr>
+                                            <td><span class="text-white fw-medium">{{ appt.time }}</span></td>
+                                            <td><span class="text-white">{{ appt.patient_name }}</span></td>
+                                            <td><strong class="text-secondary small">{{ appt.doctor_name }}</strong></td>
+                                            <td>
+                                                <span class="badge bg-warning bg-opacity-20 text-warning border border-warning border-opacity-30">Waiting in Lobby</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{ url_for('change_appointment_status', app_id=appt.id, status='Completed') }}" class="btn btn-sm btn-outline-success">
+                                                    Mark Completed <i class="bi bi-check2-circle ms-1"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-hourglass fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            The waiting queue is currently empty.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. Patients Registry Tab -->
+                <div class="tab-pane fade" id="nav-patients" role="tabpanel" aria-labelledby="nav-patients-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 60px;">ID</th>
+                                    <th scope="col">Patient Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Phone</th>
+                                    <th scope="col" style="width: 200px; text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if patients %}
+                                    {% for patient in patients %}
+                                        <tr>
+                                            <td>{{ patient.id }}</td>
+                                            <td><span class="text-white fw-medium">{{ patient.full_name }}</span></td>
+                                            <td>{{ patient.email }}</td>
+                                            <td>{{ patient.phone }}</td>
+                                            <td class="text-center">
+                                                <a href="{{ url_for('schedule_appointment') }}?patient_id={{ patient.id }}" class="btn btn-sm btn-outline-info">
+                                                    Schedule Appointment <i class="bi bi-calendar-plus ms-1"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-people fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            No registered patients found.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 4. Patient Intakes Tab -->
+                <div class="tab-pane fade" id="nav-intakes" role="tabpanel" aria-labelledby="nav-intakes-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 150px;">Date</th>
+                                    <th scope="col">Patient</th>
+                                    <th scope="col">Assigned Doctor</th>
+                                    <th scope="col">Symptoms</th>
+                                    <th scope="col">Health History</th>
+                                    <th scope="col" style="width: 100px; text-align: center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if intakes %}
+                                    {% for intake in intakes %}
+                                        <tr>
+                                            <td class="text-secondary small">{{ intake.created_at }}</td>
+                                            <td><span class="text-white small fw-medium">{{ intake.patient_name }}</span></td>
+                                            <td><strong class="text-secondary small">{{ intake.diagnosing_doctor }}</strong></td>
+                                            <td class="text-secondary small">{{ intake.symptoms }}</td>
+                                            <td class="text-secondary small">{{ intake.health_problems }}</td>
+                                            <td class="text-center">
+                                                <a href="{{ url_for('edit_patient_intake', intake_id=intake.id) }}" class="btn btn-sm btn-outline-info" title="Edit details">
+                                                    Edit <i class="bi bi-pencil-square ms-1"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-file-earmark-text fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            No patient intake forms submitted.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 5. Doctors Tab -->
+                <div class="tab-pane fade" id="nav-doctors" role="tabpanel" aria-labelledby="nav-doctors-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 60px;">ID</th>
+                                    <th scope="col">Doctor Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Phone</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if doctors %}
+                                    {% for doctor in doctors %}
+                                        <tr>
+                                            <td>{{ doctor.id }}</td>
+                                            <td><span class="text-white fw-medium">{{ doctor.full_name }}</span></td>
+                                            <td>{{ doctor.email }}</td>
+                                            <td>{{ doctor.phone }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-heart-pulse fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            No doctors registered in the system.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

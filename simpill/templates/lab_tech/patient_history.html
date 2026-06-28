@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Patient History – SimPill{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Header -->
+    <div class="mb-4">
+        <a href="{{ url_for('dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+            <i class="bi bi-arrow-left"></i> Back to Lab Console
+        </a>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mt-2">
+            <div>
+                <h2 class="text-white fw-bold">Diagnostic History Log</h2>
+                <p class="text-secondary mb-0">Comprehensive history file for patient: <strong class="text-white">{{ patient.full_name }}</strong></p>
+            </div>
+            <div>
+                <a href="{{ url_for('get_patient_ai_summary_view', patient_id=patient.id) }}" class="btn btn-simpill btn-simpill-primary d-inline-flex align-items-center">
+                    Generate AI Health Summary <i class="bi bi-cpu ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Demographics Column -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100">
+                <h5 class="text-white fw-bold mb-4">Patient Profile</h5>
+                
+                <div class="list-group list-group-flush bg-transparent">
+                    <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                        <span class="text-secondary small">Email</span>
+                        <strong class="text-white small">{{ patient.email }}</strong>
+                    </div>
+                    <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                        <span class="text-secondary small">Phone</span>
+                        <strong class="text-white small">{{ patient.phone }}</strong>
+                    </div>
+                    <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                        <span class="text-secondary small">Age</span>
+                        <strong class="text-white small">{% if profile and profile.age %}{{ profile.age }} yrs{% else %}Not set{% endif %}</strong>
+                    </div>
+                    <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                        <span class="text-secondary small">Gender</span>
+                        <strong class="text-white small">{% if profile and profile.gender %}{{ profile.gender }}{% else %}Not set{% endif %}</strong>
+                    </div>
+                    <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                        <span class="text-secondary small">Blood Group</span>
+                        <strong class="text-white small">{% if profile and profile.blood_group %}{{ profile.blood_group }}{% else %}Not set{% endif %}</strong>
+                    </div>
+                    <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-2 px-0 d-flex justify-content-between">
+                        <span class="text-secondary small">Emergency Contact</span>
+                        <strong class="text-white small">{% if profile and profile.emergency_contact %}{{ profile.emergency_contact }}{% else %}Not set{% endif %}</strong>
+                    </div>
+                    <div class="list-group-item bg-transparent border-bottom-0 py-2 px-0">
+                        <span class="text-secondary small d-block mb-1">Residential Address</span>
+                        <span class="text-white small">{% if profile and profile.address %}{{ profile.address }}{% else %}Not set{% endif %}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagnostic History Summary Column -->
+        <div class="col-lg-8">
+            <div class="glass-card p-4 h-100">
+                <h5 class="text-white fw-bold mb-4">Patient Diagnostics History</h5>
+                <p class="text-secondary small">Review patient vital signs checkups, laboratory analysis, symptoms logs, and uploaded files compiled chronologically.</p>
+                
+                <div class="row g-2 mt-2">
+                    <div class="col-4">
+                        <div class="p-3 bg-secondary bg-opacity-10 rounded-3 border border-secondary border-opacity-10 text-center">
+                            <i class="bi bi-clipboard2-pulse text-success d-block fs-3 mb-1"></i>
+                            <span class="small text-secondary d-block">Vitals Records</span>
+                            <strong class="text-white fs-5">{{ vitals_history | length }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 bg-secondary bg-opacity-10 rounded-3 border border-secondary border-opacity-10 text-center">
+                            <i class="bi bi-clipboard-data text-warning d-block fs-3 mb-1"></i>
+                            <span class="small text-secondary d-block">Lab Tests Filed</span>
+                            <strong class="text-white fs-5">{{ lab_history | length }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-3 bg-secondary bg-opacity-10 rounded-3 border border-secondary border-opacity-10 text-center">
+                            <i class="bi bi-file-earmark-medical text-info d-block fs-3 mb-1"></i>
+                            <span class="small text-secondary d-block">Uploaded Files</span>
+                            <strong class="text-white fs-5">{{ reports_history | length }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vitals Checklist History -->
+    <div class="glass-card p-4 mt-4">
+        <h5 class="text-white fw-bold mb-3"><i class="bi bi-heart-pulse text-success me-2"></i> Vital Signs Check history</h5>
+        {% if vitals_history %}
+            <div class="simpill-table-container">
+                <table class="table table-simpill mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date Recorded</th>
+                            <th scope="col">Blood Pressure</th>
+                            <th scope="col">Pulse Rate</th>
+                            <th scope="col">Weight</th>
+                            <th scope="col">Temperature</th>
+                            <th scope="col">Oxygen Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vital in vitals_history %}
+                            <tr>
+                                <td class="text-secondary small">{{ vital.recorded_at }}</td>
+                                <td><span class="text-info fw-bold">{{ vital.blood_pressure }}</span></td>
+                                <td>{{ vital.pulse }} bpm</td>
+                                <td>{{ vital.weight }} kg</td>
+                                <td>{{ vital.temperature }} °C</td>
+                                <td>
+                                    <span class="badge {% if vital.oxygen_level >= 95 %}bg-success{% else %}bg-danger{% endif %} bg-opacity-20 {% if vital.oxygen_level >= 95 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ vital.oxygen_level }}%
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4 bg-dark bg-opacity-25 rounded-3 text-secondary small">
+                No vital signs history on file.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Lab Test Results History -->
+    <div class="glass-card p-4 mt-4">
+        <h5 class="text-white fw-bold mb-3"><i class="bi bi-clipboard-data text-warning me-2"></i> Laboratory Test Findings</h5>
+        {% if lab_history %}
+            <div class="simpill-table-container">
+                <table class="table table-simpill mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date Filed</th>
+                            <th scope="col">Test Parameter</th>
+                            <th scope="col">Measured Value</th>
+                            <th scope="col">Normal Range</th>
+                            <th scope="col">Technician Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test in lab_history %}
+                            <tr>
+                                <td class="text-secondary small">{{ test.recorded_at }}</td>
+                                <td><span class="text-white fw-medium">{{ test.test_name }}</span></td>
+                                <td><span class="text-info fw-bold">{{ test.test_value }}</span></td>
+                                <td class="text-secondary small">{{ test.normal_range }}</td>
+                                <td class="text-secondary small">{{ test.comments }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4 bg-dark bg-opacity-25 rounded-3 text-secondary small">
+                No laboratory test history on file.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Symptoms History List -->
+    <div class="glass-card p-4 mt-4">
+        <h5 class="text-white fw-bold mb-3"><i class="bi bi-activity text-info me-2"></i> Submitted Symptoms Logs</h5>
+        {% if intake_history %}
+            <div class="simpill-table-container">
+                <table class="table table-simpill mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 150px;">Date Submitted</th>
+                            <th scope="col" style="width: 180px;">Diagnosing Doctor</th>
+                            <th scope="col">Symptoms Reported</th>
+                            <th scope="col">Health Problems History</th>
+                            <th scope="col">Treatment Goals</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for intake in intake_history %}
+                            <tr>
+                                <td class="text-secondary small">{{ intake.created_at }}</td>
+                                <td><strong class="text-white small">{{ intake.diagnosing_doctor }}</strong></td>
+                                <td class="text-secondary small">{{ intake.symptoms }}</td>
+                                <td class="text-secondary small">{{ intake.health_problems }}</td>
+                                <td class="text-secondary small">{{ intake.treatment_needs }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4 bg-dark bg-opacity-25 rounded-3 text-secondary small">
+                No symptoms checklist logs on file.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Uploaded Documents History -->
+    <div class="glass-card p-4 mt-4">
+        <h5 class="text-white fw-bold mb-3"><i class="bi bi-file-earmark-medical text-danger me-2"></i> Patient Uploaded Documents</h5>
+        {% if reports_history %}
+            <div class="simpill-table-container">
+                <table class="table table-simpill mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">File Name</th>
+                            <th scope="col">Uploaded Date</th>
+                            <th scope="col" style="width: 120px; text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports_history %}
+                            <tr>
+                                <td>
+                                    <span class="text-white small fw-medium">
+                                        {% if report.file_name.lower().endswith('.pdf') %}
+                                            <i class="bi bi-filetype-pdf text-danger me-2"></i>
+                                        {% else %}
+                                            <i class="bi bi-filetype-png text-info me-2"></i>
+                                        {% endif %}
+                                        {{ report.file_name }}
+                                    </span>
+                                </td>
+                                <td class="text-secondary small">{{ report.uploaded_at }}</td>
+                                <td class="text-center">
+                                    <a href="{{ url_for('view_medical_report_ocr', report_id=report.id) }}" target="_blank" class="btn btn-sm btn-outline-info px-3">
+                                        Analyze OCR <i class="bi bi-cpu ms-1"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-4 bg-dark bg-opacity-25 rounded-3 text-secondary small">
+                No uploaded files on file.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

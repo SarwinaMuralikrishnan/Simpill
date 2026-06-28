@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Write Prescription – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link">
+                    <i class="bi bi-heart-pulse"></i> Doctor Console
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('doctor_prescribe') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-prescription2"></i> Write Prescription
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <div class="mb-4">
+            <a href="{{ url_for('dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to Console
+            </a>
+            <h2 class="text-white fw-bold mt-2">Write Medication Prescription</h2>
+            <p class="text-secondary">Create a new prescription order for a registered clinic patient.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Prescription Form -->
+            <div class="col-xl-7 col-lg-8">
+                <div class="glass-card p-4">
+                    <form action="{{ url_for('doctor_prescribe') }}" method="POST">
+                        <div class="row">
+                            <!-- Select Patient -->
+                            <div class="col-md-12 mb-3">
+                                <label for="patient_id" class="form-label text-secondary small fw-medium">Select Patient</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <select class="form-select form-simpill-control form-simpill-select" id="patient_id" name="patient_id" required>
+                                        <option value="" disabled {% if not request.args.get('patient_id') %}selected{% endif %}>Choose Patient...</option>
+                                        {% for patient in patients %}
+                                            <option value="{{ patient.id }}" {% if request.args.get('patient_id')|int == patient.id %}selected{% endif %}>
+                                                {{ patient.full_name }} ({{ patient.email }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Medicine Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="medicine_name" class="form-label text-secondary small fw-medium">Medicine Name & Strength</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-capsule"></i>
+                                    </span>
+                                    <input type="text" class="form-control form-simpill-control" id="medicine_name" name="medicine_name" placeholder="Amoxicillin 500mg" required>
+                                </div>
+                            </div>
+
+                            <!-- Dosage -->
+                            <div class="col-md-6 mb-3">
+                                <label for="dosage" class="form-label text-secondary small fw-medium">Dosage / Frequency</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-calendar3"></i>
+                                    </span>
+                                    <input type="text" class="form-control form-simpill-control" id="dosage" name="dosage" placeholder="3 times daily" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Special Instructions -->
+                        <div class="mb-4">
+                            <label for="instructions" class="form-label text-secondary small fw-medium">Special Instructions</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-chat-left-dots"></i>
+                                </span>
+                                <textarea class="form-control form-simpill-control" id="instructions" name="instructions" rows="3" placeholder="Take after meals for 7 days. Do not skip doses."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-end gap-3 mt-3">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-simpill btn-simpill-outline">Cancel</a>
+                            <button type="submit" class="btn btn-simpill btn-simpill-primary">
+                                Confirm Prescription <i class="bi bi-check-circle ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- AI Prescription Assistant -->
+            <div class="col-xl-5 col-lg-4">
+                <div class="glass-card p-4 border border-info border-opacity-10 h-100">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-2 bg-info bg-opacity-10 text-info rounded-3 me-2">
+                            <i class="bi bi-cpu fs-4"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-white fw-bold mb-0">AI Prescription Assistant</h5>
+                            <span class="text-info small" style="font-size: 0.75rem;">SimPill Smart Engine</span>
+                        </div>
+                    </div>
+                    
+                    <p class="text-secondary small mb-4">Select a patient's diagnosed symptom to receive real-time, clinically validated medicine suggestions, dosages, and user instructions.</p>
+                    
+                    <div class="mb-4">
+                        <label for="ai-symptom-select" class="form-label text-secondary small fw-medium">Symptom / Diagnosis Select</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                <i class="bi bi-clipboard2-pulse"></i>
+                            </span>
+                            <select class="form-select form-simpill-control form-simpill-select" id="ai-symptom-select">
+                                <option value="" selected disabled>Select Symptom...</option>
+                                <option value="fever">Fever</option>
+                                <option value="cold">Cold</option>
+                                <option value="cough">Cough</option>
+                                <option value="headache">Headache</option>
+                                <option value="diabetes">Diabetes</option>
+                                <option value="bp">Blood Pressure</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-secondary bg-opacity-10 rounded-3 border border-secondary border-opacity-10 mb-4 d-none" id="ai-suggestion-preview">
+                        <div class="small mb-1 text-secondary fw-semibold">AI Recommendation:</div>
+                        <div class="fw-bold text-white mb-2" id="ai-med-name">--</div>
+                        
+                        <div class="small text-secondary mb-1">Suggested Dosage:</div>
+                        <div class="text-info fw-semibold small mb-2" id="ai-dosage-name">--</div>
+                        
+                        <div class="small text-secondary mb-1">Patient Instructions:</div>
+                        <div class="text-white small" style="font-size: 0.8rem;" id="ai-inst-text">--</div>
+                    </div>
+                    
+                    <button type="button" class="btn btn-simpill btn-simpill-primary w-100 d-flex align-items-center justify-content-center py-2.5" id="ai-apply-btn" disabled>
+                        <i class="bi bi-magic me-2"></i> Apply AI Suggestions
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Assistant Script -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const symptomSelect = document.getElementById('ai-symptom-select');
+            const previewDiv = document.getElementById('ai-suggestion-preview');
+            const medNameSpan = document.getElementById('ai-med-name');
+            const dosageSpan = document.getElementById('ai-dosage-name');
+            const instSpan = document.getElementById('ai-inst-text');
+            const applyBtn = document.getElementById('ai-apply-btn');
+            
+            const medField = document.getElementById('medicine_name');
+            const dosageField = document.getElementById('dosage');
+            const instField = document.getElementById('instructions');
+            
+            // Medicine suggestions data mapping
+            const db = {
+                fever: {
+                    med: 'Paracetamol 500mg',
+                    dosage: 'Every 6 hours as needed',
+                    inst: 'Take after food. Do not exceed 4000mg (8 tablets) in 24 hours.'
+                },
+                cold: {
+                    med: 'Cetirizine 10mg',
+                    dosage: 'Once daily at bedtime',
+                    inst: 'May cause drowsiness. Avoid driving or operating heavy machinery.'
+                },
+                cough: {
+                    med: 'Benadryl Syrup',
+                    dosage: '10ml three times daily',
+                    inst: 'Shake well before use. Take after meals. May cause drowsiness.'
+                },
+                headache: {
+                    med: 'Ibuprofen 400mg',
+                    dosage: 'Twice daily as needed',
+                    inst: 'Take with food or a glass of milk to avoid stomach irritation.'
+                },
+                diabetes: {
+                    med: 'Metformin 500mg',
+                    dosage: 'Twice daily with meals',
+                    inst: 'Take with breakfast and dinner. Monitor blood sugar levels regularly.'
+                },
+                bp: {
+                    med: 'Amlodipine 5mg',
+                    dosage: 'Once daily in the morning',
+                    inst: 'Take consistently at the same time each day. Monitor blood pressure levels.'
+                }
+            };
+            
+            symptomSelect.addEventListener('change', function() {
+                const val = this.value;
+                if(val && db[val]) {
+                    medNameSpan.textContent = db[val].med;
+                    dosageSpan.textContent = db[val].dosage;
+                    instSpan.textContent = db[val].inst;
+                    previewDiv.classList.remove('d-none');
+                    applyBtn.removeAttribute('disabled');
+                } else {
+                    previewDiv.classList.add('d-none');
+                    applyBtn.setAttribute('disabled', 'true');
+                }
+            });
+            
+            applyBtn.addEventListener('click', function() {
+                const val = symptomSelect.value;
+                if(val && db[val]) {
+                    medField.value = db[val].med;
+                    dosageField.value = db[val].dosage;
+                    instField.value = db[val].inst;
+                    
+                    // Add simple visual flash indicator
+                    [medField, dosageField, instField].forEach(field => {
+                        field.style.transition = 'all 0.3s ease';
+                        field.style.borderColor = '#0dd5c2';
+                        field.style.boxShadow = '0 0 10px rgba(13, 213, 194, 0.4)';
+                        setTimeout(() => {
+                            field.style.borderColor = '';
+                            field.style.boxShadow = '';
+                        }, 1000);
+                    });
+                }
+            });
+        });
+        </script>
+    </main>
+</div>
+{% endblock %}

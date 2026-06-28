@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Register Account – SimPill Healthcare{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="col-md-7 col-lg-6">
+            <div class="glass-card p-5">
+                <div class="text-center mb-4">
+                    <i class="bi bi-capsule-pill text-gradient-cyan-teal fs-1 mb-2"></i>
+                    <h3 class="fw-bold text-white mb-1">Create Account</h3>
+                    <p class="text-secondary small">Register to access SimPill smart healthcare services</p>
+                </div>
+                
+                <form action="{{ url_for('signup') }}" method="POST" id="signup-form">
+                    <div class="row">
+                        <!-- Full Name -->
+                        <div class="col-md-6 mb-3">
+                            <label for="full_name" class="form-label text-secondary small fw-medium">Full Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input type="text" class="form-control form-simpill-control" id="full_name" name="full_name" placeholder="John Doe" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Email Address -->
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label text-secondary small fw-medium">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-envelope"></i>
+                                </span>
+                                <input type="email" class="form-control form-simpill-control" id="email" name="email" placeholder="john@example.com" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Phone Number -->
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label text-secondary small fw-medium">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-telephone"></i>
+                                </span>
+                                <input type="tel" class="form-control form-simpill-control" id="phone" name="phone" placeholder="+1 (555) 000-0000" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Account Role -->
+                        <div class="col-md-6 mb-3">
+                            <label for="role" class="form-label text-secondary small fw-medium">Register As (Role)</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-shield-lock"></i>
+                                </span>
+                                <select class="form-select form-simpill-control form-simpill-select" id="role" name="role" required>
+                                    <option value="Patient" selected>Patient</option>
+                                    <option value="Doctor">Doctor</option>
+                                    <option value="Receptionist">Receptionist</option>
+                                    <option value="Lab Technician">Lab Technician</option>
+                                    <option value="Pharmacist">Pharmacist</option>
+                                    <option value="Cashier">Cashier</option>
+                                    <option value="Admin">Admin (Administrator)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Password -->
+                        <div class="col-md-6 mb-3">
+                            <label for="password" class="form-label text-secondary small fw-medium">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password" class="form-control form-simpill-control" id="password" name="password" placeholder="••••••••" required>
+                                <button class="btn btn-outline-secondary border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary password-toggle-btn" type="button" data-target="password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Confirm Password -->
+                        <div class="col-md-6 mb-4">
+                            <label for="confirm_password" class="form-label text-secondary small fw-medium">Confirm Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
+                                <input type="password" class="form-control form-simpill-control" id="confirm_password" name="confirm_password" placeholder="••••••••" required>
+                                <button class="btn btn-outline-secondary border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary password-toggle-btn" type="button" data-target="confirm_password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit -->
+                    <button type="submit" class="btn btn-simpill btn-simpill-primary w-100 py-3 mb-3">
+                        Register Account <i class="bi bi-person-plus ms-2"></i>
+                    </button>
+                    
+                    <div class="text-center mt-3">
+                        <span class="text-secondary small">Already have an account?</span>
+                        <a href="{{ url_for('login') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold ms-1">
+                            Sign In here <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Validation on registration form for matching passwords
+    document.getElementById('signup-form').addEventListener('submit', function(e) {
+        const pass = document.getElementById('password').value;
+        const confirmPass = document.getElementById('confirm_password').value;
+        if (pass !== confirmPass) {
+            alert("Passwords do not match! Please check and try again.");
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

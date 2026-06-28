@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block title %}Lab Console – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-radioactive"></i> Lab Console
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('record_patient_vitals') }}" class="sidebar-menu-link">
+                    <i class="bi bi-heart-pulse"></i> Record Vitals
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('upload_lab_results') }}" class="sidebar-menu-link">
+                    <i class="bi bi-file-earmark-medical"></i> Upload Lab Test
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <span class="badge badge-role badge-role-lab-technician mb-2">Diagnostics Lab</span>
+                <h2 class="text-white fw-bold mb-1">Laboratory Diagnostics</h2>
+                <p class="text-secondary mb-0">Record physical vitals, upload laboratory measurements, and compile patient records.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('record_patient_vitals') }}" class="btn btn-simpill btn-simpill-outline d-inline-flex align-items-center">
+                    <i class="bi bi-heart-pulse-fill me-1"></i> Record Vitals
+                </a>
+                <a href="{{ url_for('upload_lab_results') }}" class="btn btn-simpill btn-simpill-primary d-inline-flex align-items-center">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Upload Lab Test
+                </a>
+            </div>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="row g-4 mb-4">
+            <!-- Metric 1: Total Patients -->
+            <div class="col-md-4">
+                <div class="glass-card stat-card patients p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-secondary small d-block">Patients Directory</span>
+                            <h3 class="text-white fw-bold mt-1 mb-0">{{ patients | length }}</h3>
+                        </div>
+                        <div class="p-2 bg-primary bg-opacity-10 text-primary rounded-3">
+                            <i class="bi bi-person-check fs-4"></i>
+                        </div>
+                    </div>
+                    <span class="text-secondary small">Total patient records</span>
+                </div>
+            </div>
+
+            <!-- Metric 2: Vitals Taken -->
+            <div class="col-md-4">
+                <div class="glass-card stat-card doctors p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-secondary small d-block">Vitals Recorded</span>
+                            <h3 class="text-white fw-bold mt-1 mb-0">{{ vitals | length }}</h3>
+                        </div>
+                        <div class="p-2 bg-success bg-opacity-10 text-success rounded-3">
+                            <i class="bi bi-heart-pulse fs-4"></i>
+                        </div>
+                    </div>
+                    <span class="text-secondary small">Historical physical checkups</span>
+                </div>
+            </div>
+
+            <!-- Metric 3: Lab Tests Filed -->
+            <div class="col-md-4">
+                <div class="glass-card stat-card staff p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-secondary small d-block">Lab Tests Uploaded</span>
+                            <h3 class="text-white fw-bold mt-1 mb-0">{{ lab_results | length }}</h3>
+                        </div>
+                        <div class="p-2 bg-warning bg-opacity-10 text-warning rounded-3">
+                            <i class="bi bi-file-earmark-medical fs-4"></i>
+                        </div>
+                    </div>
+                    <span class="text-secondary small">Laboratory findings filed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Console Tabs -->
+        <div class="glass-card p-4">
+            <nav class="mb-4">
+                <div class="nav nav-tabs border-secondary border-opacity-25" id="nav-tab" role="tablist">
+                    <button class="nav-link text-secondary border-0 active" id="nav-patients-tab" data-bs-toggle="tab" data-bs-target="#nav-patients" type="button" role="tab" aria-controls="nav-patients" aria-selected="true">
+                        <i class="bi bi-people me-1"></i> Patient Registry
+                    </button>
+                    <button class="nav-link text-secondary border-0" id="nav-reports-tab" data-bs-toggle="tab" data-bs-target="#nav-reports" type="button" role="tab" aria-controls="nav-reports" aria-selected="false">
+                        <i class="bi bi-file-earmark-arrow-up me-1"></i> Patient Uploaded Reports ({{ reports | length }})
+                    </button>
+                    <button class="nav-link text-secondary border-0" id="nav-symptoms-tab" data-bs-toggle="tab" data-bs-target="#nav-symptoms" type="button" role="tab" aria-controls="nav-symptoms" aria-selected="false">
+                        <i class="bi bi-activity me-1"></i> Symptoms Logs
+                    </button>
+                    <button class="nav-link text-secondary border-0" id="nav-vitals-tab" data-bs-toggle="tab" data-bs-target="#nav-vitals" type="button" role="tab" aria-controls="nav-vitals" aria-selected="false">
+                        <i class="bi bi-clipboard2-pulse me-1"></i> Vitals Registry ({{ vitals | length }})
+                    </button>
+                    <button class="nav-link text-secondary border-0" id="nav-labs-tab" data-bs-toggle="tab" data-bs-target="#nav-labs" type="button" role="tab" aria-controls="nav-labs" aria-selected="false">
+                        <i class="bi bi-clipboard-data-fill me-1"></i> Lab Test Registry ({{ lab_results | length }})
+                    </button>
+                </div>
+            </nav>
+
+            <div class="tab-content" id="nav-tabContent">
+                <!-- Tab 1: Patient Registry -->
+                <div class="tab-pane fade show active" id="nav-patients" role="tabpanel" aria-labelledby="nav-patients-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 60px;">ID</th>
+                                    <th scope="col">Patient Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Phone</th>
+                                    <th scope="col" style="width: 380px; text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if patients %}
+                                    {% for patient in patients %}
+                                        <tr>
+                                            <td>{{ patient.id }}</td>
+                                            <td><span class="text-white fw-medium">{{ patient.full_name }}</span></td>
+                                            <td>{{ patient.email }}</td>
+                                            <td>{{ patient.phone }}</td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <a href="{{ url_for('record_patient_vitals') }}?patient_id={{ patient.id }}" class="btn btn-sm btn-outline-success">
+                                                        Record Vitals <i class="bi bi-heart-pulse ms-1"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('upload_lab_results') }}?patient_id={{ patient.id }}" class="btn btn-sm btn-outline-warning">
+                                                        Upload Lab Test <i class="bi bi-file-earmark-plus ms-1"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('view_patient_history', patient_id=patient.id) }}" class="btn btn-sm btn-outline-info">
+                                                        View History <i class="bi bi-journal-medical ms-1"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-people fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            No patients found.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Uploaded Reports -->
+                <div class="tab-pane fade" id="nav-reports" role="tabpanel" aria-labelledby="nav-reports-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Patient Name</th>
+                                    <th scope="col">File Name</th>
+                                    <th scope="col">Uploaded At</th>
+                                    <th scope="col" style="width: 120px; text-align: center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if reports %}
+                                    {% for report in reports %}
+                                        <tr>
+                                            <td><strong class="text-white">{{ report.patient_name }}</strong></td>
+                                            <td>
+                                                <span class="text-secondary small fw-medium">
+                                                    {% if report.file_name.lower().endswith('.pdf') %}
+                                                        <i class="bi bi-filetype-pdf text-danger me-1"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-filetype-png text-info me-1"></i>
+                                                    {% endif %}
+                                                    {{ report.file_name }}
+                                                </span>
+                                            </td>
+                                            <td class="text-secondary small">{{ report.uploaded_at }}</td>
+                                            <td class="text-center">
+                                                <a href="{{ url_for('static', filename=report.file_path) }}" target="_blank" class="btn btn-sm btn-outline-info px-3">
+                                                    View File <i class="bi bi-eye ms-1"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-folder-x fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            No patient reports uploaded.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Patient Symptoms -->
+                <div class="tab-pane fade" id="nav-symptoms" role="tabpanel" aria-labelledby="nav-symptoms-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 150px;">Date Submitted</th>
+                                    <th scope="col" style="width: 180px;">Patient Name</th>
+                                    <th scope="col">Symptoms Reported</th>
+                                    <th scope="col">Health Problems History</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if intakes %}
+                                    {% for intake in intakes %}
+                                        <tr>
+                                            <td class="text-secondary small">{{ intake.created_at }}</td>
+                                            <td><strong class="text-white small">{{ intake.patient_name }}</strong></td>
+                                            <td class="text-secondary small">{{ intake.symptoms }}</td>
+                                            <td class="text-secondary small">{{ intake.health_problems }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-activity fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            No symptoms logged.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Vitals Registry -->
+                <div class="tab-pane fade" id="nav-vitals" role="tabpanel" aria-labelledby="nav-vitals-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date Taken</th>
+                                    <th scope="col">Patient Name</th>
+                                    <th scope="col">Blood Pressure</th>
+                                    <th scope="col">Pulse</th>
+                                    <th scope="col">Weight</th>
+                                    <th scope="col">Temp</th>
+                                    <th scope="col">Oxygen</th>
+                                    <th scope="col">Recorded By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if vitals %}
+                                    {% for vital in vitals %}
+                                        <tr>
+                                            <td class="text-secondary small">{{ vital.recorded_at }}</td>
+                                            <td><strong class="text-white small">{{ vital.patient_name }}</strong></td>
+                                            <td><span class="text-info fw-bold">{{ vital.blood_pressure }}</span></td>
+                                            <td>{{ vital.pulse }} bpm</td>
+                                            <td>{{ vital.weight }} kg</td>
+                                            <td>{{ vital.temperature }} °C</td>
+                                            <td>
+                                                <span class="badge {% if vital.oxygen_level >= 95 %}bg-success{% else %}bg-danger{% endif %} bg-opacity-20 {% if vital.oxygen_level >= 95 %}text-success{% else %}text-danger{% endif %}">
+                                                    {{ vital.oxygen_level }}%
+                                                </span>
+                                            </td>
+                                            <td><span class="text-secondary small">{{ vital.recorder_name }}</span></td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="8" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-clipboard2-pulse fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            No physical vital records saved.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 5: Lab Test Registry -->
+                <div class="tab-pane fade" id="nav-labs" role="tabpanel" aria-labelledby="nav-labs-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date Filed</th>
+                                    <th scope="col">Patient Name</th>
+                                    <th scope="col">Test Parameter</th>
+                                    <th scope="col">Measured Value</th>
+                                    <th scope="col">Normal Range</th>
+                                    <th scope="col">Comments</th>
+                                    <th scope="col">Recorded By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if lab_results %}
+                                    {% for result in lab_results %}
+                                        <tr>
+                                            <td class="text-secondary small">{{ result.recorded_at }}</td>
+                                            <td><strong class="text-white small">{{ result.patient_name }}</strong></td>
+                                            <td><span class="text-white fw-medium">{{ result.test_name }}</span></td>
+                                            <td><span class="text-info fw-bold">{{ result.test_value }}</span></td>
+                                            <td class="text-secondary small">{{ result.normal_range }}</td>
+                                            <td class="text-secondary small">{{ result.comments }}</td>
+                                            <td><span class="text-secondary small">{{ result.recorder_name }}</span></td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-clipboard-data fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            No laboratory test results recorded.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

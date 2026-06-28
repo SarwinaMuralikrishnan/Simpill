@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Add Staff Member – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('admin_dashboard') }}" class="sidebar-menu-link">
+                    <i class="bi bi-speedometer2"></i> Registry Console
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('add_staff') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-person-plus-fill"></i> Add Staff Member
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <div class="mb-4">
+            <a href="{{ url_for('admin_dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to User Registry
+            </a>
+            <h2 class="text-white fw-bold mt-2">Register New Staff Profile</h2>
+            <p class="text-secondary">Create accounts for doctors, technicians, clerks, and other admin users.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="glass-card p-5">
+                    <form action="{{ url_for('add_staff') }}" method="POST" id="add-staff-form">
+                        <div class="row">
+                            <!-- Full Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="full_name" class="form-label text-secondary small fw-medium">Full Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <input type="text" class="form-control form-simpill-control" id="full_name" name="full_name" placeholder="Dr. Sarah Connor" required>
+                                </div>
+                            </div>
+                            
+                            <!-- Email -->
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label text-secondary small fw-medium">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-envelope"></i>
+                                    </span>
+                                    <input type="email" class="form-control form-simpill-control" id="email" name="email" placeholder="sarah.c@simpill.com" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Phone -->
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label text-secondary small fw-medium">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-telephone"></i>
+                                    </span>
+                                    <input type="tel" class="form-control form-simpill-control" id="phone" name="phone" placeholder="+1 (555) 456-7890" required>
+                                </div>
+                            </div>
+
+                            <!-- Role Dropdown -->
+                            <div class="col-md-6 mb-3">
+                                <label for="role" class="form-label text-secondary small fw-medium">Assigned Role</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-shield-lock"></i>
+                                    </span>
+                                    <select class="form-select form-simpill-control form-simpill-select" id="role" name="role" required>
+                                        <option value="Doctor" selected>Doctor</option>
+                                        <option value="Receptionist">Receptionist</option>
+                                        <option value="Lab Technician">Lab Technician</option>
+                                        <option value="Pharmacist">Pharmacist</option>
+                                        <option value="Cashier">Cashier</option>
+                                        <option value="Admin">Admin (Administrator)</option>
+                                        <option value="Patient">Patient</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Password -->
+                            <div class="col-md-6 mb-4">
+                                <label for="password" class="form-label text-secondary small fw-medium">Temporary Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-lock"></i>
+                                    </span>
+                                    <input type="password" class="form-control form-simpill-control" id="password" name="password" placeholder="••••••••" required>
+                                    <button class="btn btn-outline-secondary border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary password-toggle-btn" type="button" data-target="password">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="col-md-6 mb-4">
+                                <label for="confirm_password" class="form-label text-secondary small fw-medium">Confirm Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-lock-fill"></i>
+                                    </span>
+                                    <input type="password" class="form-control form-simpill-control" id="confirm_password" name="confirm_password" placeholder="••••••••" required>
+                                    <button class="btn btn-outline-secondary border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary password-toggle-btn" type="button" data-target="confirm_password">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-end gap-3 mt-3">
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-simpill btn-simpill-outline">Cancel</a>
+                            <button type="submit" class="btn btn-simpill btn-simpill-primary">
+                                Create Account <i class="bi bi-check-circle ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    document.getElementById('add-staff-form').addEventListener('submit', function(e) {
+        const pass = document.getElementById('password').value;
+        const confirmPass = document.getElementById('confirm_password').value;
+        if (pass !== confirmPass) {
+            alert("Passwords do not match! Please check and try again.");
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

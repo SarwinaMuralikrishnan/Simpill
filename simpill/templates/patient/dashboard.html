@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Portal – SimPill{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Greeting Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-5 gap-3">
+        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-4">
+            <div>
+                <span class="badge badge-role badge-role-patient mb-2">Patient Dashboard</span>
+                <h2 class="text-white fw-bold mb-1">Welcome, {{ current_user.full_name }}</h2>
+                <p class="text-secondary mb-0">Manage your medical records, consult forms, and health profile.</p>
+            </div>
+            <!-- Wallet Credits Badge -->
+            <div class="d-flex align-items-center bg-secondary bg-opacity-10 rounded-3 p-3 border border-secondary border-opacity-10 no-print" style="min-width: 200px;">
+                <div class="p-2 bg-info bg-opacity-15 text-info rounded-3 me-3">
+                    <i class="bi bi-wallet2 fs-4"></i>
+                </div>
+                <div>
+                    <span class="text-secondary small d-block" style="font-size: 0.75rem;">REWARD BALANCE</span>
+                    <a href="{{ url_for('wallet_dashboard') }}" class="text-decoration-none">
+                        <strong class="text-white fs-5 text-gradient-cyan-teal">{{ wallet.credits if wallet else 0 }} Credits</strong>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ url_for('reminders_dashboard') }}" class="btn btn-simpill btn-simpill-outline d-flex align-items-center">
+                <i class="bi bi-capsule-pill me-2"></i> Medicine Reminders
+            </a>
+            <a href="{{ url_for('edit_patient_profile') }}" class="btn btn-simpill btn-simpill-outline d-flex align-items-center">
+                <i class="bi bi-person-gear me-2"></i> Edit Health Profile
+            </a>
+            <a href="{{ url_for('patient_intake') }}" class="btn btn-simpill btn-simpill-primary d-flex align-items-center">
+                <i class="bi bi-file-earmark-plus me-2"></i> New Intake Form
+            </a>
+        </div>
+    </div>
+
+    <!-- Warning / Setup profile alert if not completed -->
+    {% if not profile or not profile.age or not profile.gender or not profile.address %}
+    <div class="alert alert-simpill alert-simpill-warning mb-4" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill text-warning fs-4 me-3"></i>
+            <div>
+                <strong class="text-white">Profile Incomplete!</strong> Your health profile does not contain demographic and emergency data yet.
+                <a href="{{ url_for('edit_patient_profile') }}" class="text-info fw-semibold ms-2 text-decoration-none">Complete Profile now <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Column 1: Patient Profile Card -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-gradient-teal-blue rounded-circle p-1 d-inline-block me-3">
+                        <div class="bg-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-heart-pulse-fill text-gradient-cyan-teal fs-4"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="text-white fw-bold mb-0">Health Demographics</h5>
+                        <span class="text-secondary small">Verified Profile</span>
+                    </div>
+                </div>
+
+                <div class="list-group list-group-flush bg-transparent">
+                    <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-3 px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-secondary small">Age</span>
+                        <strong class="text-white">{% if profile and profile.age %}{{ profile.age }} yrs{% else %}<span class="text-danger small italic">Not set</span>{% endif %}</strong>
+                    </div>
+                    <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-3 px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-secondary small">Gender</span>
+                        <strong class="text-white">{% if profile and profile.gender %}{{ profile.gender }}{% else %}<span class="text-danger small italic">Not set</span>{% endif %}</strong>
+                    </div>
+                    <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-3 px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-secondary small">Blood Group</span>
+                        <strong class="text-white">
+                            {% if profile and profile.blood_group %}
+                            <span class="badge bg-danger bg-opacity-25 border border-danger border-opacity-25 text-danger px-2 py-1">{{ profile.blood_group }}</span>
+                            {% else %}
+                            <span class="text-danger small italic">Not set</span>
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div class="list-group-item bg-transparent border-secondary border-opacity-10 py-3 px-0 d-flex justify-content-between align-items-center">
+                        <span class="text-secondary small">Emergency Phone</span>
+                        <strong class="text-white">{% if profile and profile.emergency_contact %}{{ profile.emergency_contact }}{% else %}<span class="text-danger small italic">Not set</span>{% endif %}</strong>
+                    </div>
+                    <div class="list-group-item bg-transparent border-bottom-0 py-3 px-0">
+                        <span class="text-secondary small d-block mb-1">Residential Address</span>
+                        <strong class="text-white small fw-normal">
+                            {% if profile and profile.address %}{{ profile.address }}{% else %}<span class="text-danger small italic">Not set</span>{% endif %}
+                        </strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 2: Document / File Upload Center -->
+        <div class="col-lg-8">
+            <div class="glass-card p-4 h-100">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="bi bi-cloud-arrow-up-fill text-gradient-cyan-teal me-2"></i>
+                    Medical Reports Repository
+                </h5>
+                
+                <!-- Upload Form -->
+                <form action="{{ url_for('upload_report') }}" method="POST" enctype="multipart/form-data" class="p-3 bg-secondary bg-opacity-10 rounded-3 border border-secondary border-opacity-15 mb-4">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-7">
+                            <label for="report_file" class="form-label text-secondary small fw-medium mb-1">Upload Laboratory/Clinical File (PDF, JPG, PNG)</label>
+                            <input class="form-control form-simpill-control py-2" type="file" id="report_file" name="report_file" required>
+                        </div>
+                        <div class="col-md-5 d-grid pt-3 pt-md-4">
+                            <button type="submit" class="btn btn-simpill btn-simpill-primary">
+                                Upload Document <i class="bi bi-cloud-upload ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Document List -->
+                <h6 class="text-white fw-semibold mb-3">Uploaded Documents</h6>
+                {% if reports %}
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">File Name</th>
+                                    <th scope="col">Uploaded Date</th>
+                                    <th scope="col" style="width: 100px; text-align: center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in reports %}
+                                    <tr>
+                                        <td>
+                                            <span class="text-white small fw-medium d-block text-truncate" style="max-width: 300px;">
+                                                {% if report.file_name.lower().endswith('.pdf') %}
+                                                    <i class="bi bi-filetype-pdf text-danger me-2"></i>
+                                                {% else %}
+                                                    <i class="bi bi-filetype-png text-info me-2"></i>
+                                                {% endif %}
+                                                {{ report.file_name }}
+                                            </span>
+                                        </td>
+                                        <td class="text-secondary small">{{ report.uploaded_at }}</td>
+                                        <td class="text-center">
+                                            <a href="{{ url_for('view_medical_report_ocr', report_id=report.id) }}" target="_blank" class="btn btn-sm btn-outline-info px-3 py-1 small">
+                                                View <i class="bi bi-eye ms-1"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 bg-dark bg-opacity-25 rounded-3 border border-secondary border-opacity-10 text-secondary">
+                        <i class="bi bi-folder-x fs-3 d-block mb-1 text-secondary text-opacity-30"></i>
+                        <span class="small">No medical reports uploaded yet.</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Intake Forms Registry -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="bi bi-file-earmark-medical-fill text-gradient-cyan-teal me-2"></i>
+                    Medical Consultations & Intake History
+                </h5>
+
+                {% if intake_forms %}
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 150px;">Date Submitted</th>
+                                    <th scope="col" style="width: 180px;">Diagnosing Doctor</th>
+                                    <th scope="col">Symptoms Reported</th>
+                                    <th scope="col">Health Problems</th>
+                                    <th scope="col">Treatment Needs</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for form in intake_forms %}
+                                    <tr>
+                                        <td class="text-secondary small">{{ form.created_at }}</td>
+                                        <td>
+                                            <strong class="text-white small">{{ form.diagnosing_doctor }}</strong>
+                                        </td>
+                                        <td class="text-secondary small">{{ form.symptoms }}</td>
+                                        <td class="text-secondary small">{{ form.health_problems }}</td>
+                                        <td class="text-secondary small">{{ form.treatment_needs }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-secondary">
+                        <i class="bi bi-file-earmark-diff fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                        No medical intake forms on file. Click "New Intake Form" to register symptoms.
+                    </div>
+                {% endif %}
+    <!-- Prescriptions and Billing Row -->
+    <div class="row mt-4 g-4">
+        <!-- Prescriptions Column -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 h-100">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="bi bi-prescription2 text-gradient-cyan-teal me-2"></i>
+                    My Prescriptions
+                </h5>
+                {% if prescriptions %}
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Medication</th>
+                                    <th scope="col">Dosage</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pres in prescriptions %}
+                                    <tr>
+                                        <td>
+                                            <strong class="text-white small d-block">{{ pres.medicine_name }}</strong>
+                                            <span class="text-secondary small d-block" style="font-size: 0.75rem;">By {{ pres.doctor_name }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="text-secondary small d-block">{{ pres.dosage }}</span>
+                                            <span class="text-secondary small d-block" style="font-size: 0.75rem; font-style: italic;">{{ pres.instructions }}</span>
+                                        </td>
+                                        <td>
+                                            {% if pres.status == 'Pending' %}
+                                                <span class="badge bg-warning bg-opacity-25 border border-warning border-opacity-25 text-warning">Pending</span>
+                                            {% else %}
+                                                <span class="badge bg-success bg-opacity-25 border border-success border-opacity-25 text-success">Dispensed</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-secondary">
+                        <i class="bi bi-prescription fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                        No prescriptions on file.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Billing Column -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 h-100">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="bi bi-credit-card-fill text-gradient-cyan-teal me-2"></i>
+                    Billing & Invoices
+                </h5>
+                {% if bills %}
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Invoice</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Method</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for bill in bills %}
+                                    <tr>
+                                        <td>
+                                            <a href="{{ url_for('view_printable_invoice', bill_id=bill.id) }}" target="_blank" class="text-white fw-bold small text-decoration-none">
+                                                INV-{{ "%05d"|format(bill.id) }} <i class="bi bi-printer ms-1" style="font-size: 0.75rem;"></i>
+                                            </a>
+                                            <span class="text-secondary small d-block" style="font-size: 0.7rem;">{{ bill.created_at }}</span>
+                                        </td>
+                                        <td><strong class="text-info">${{ "%.2f"|format(bill.amount) }}</strong></td>
+                                        <td><span class="text-secondary small">{{ bill.payment_method or 'Pending' }}</span></td>
+                                        <td>
+                                            {% if bill.status == 'Unpaid' %}
+                                                <span class="badge bg-danger bg-opacity-25 border border-danger border-opacity-25 text-danger px-2 py-1">Unpaid</span>
+                                            {% else %}
+                                                <span class="badge bg-success bg-opacity-25 border border-success border-opacity-25 text-success px-2 py-1">Paid</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 text-secondary">
+                        <i class="bi bi-receipt-cutoff fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                        No billing invoices on file.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Relative Access Module Registry Row -->
+    <div class="row g-4 mt-2">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="text-white fw-bold mb-4">
+                    <i class="bi bi-people-fill text-gradient-cyan-teal me-2"></i>
+                    Family Access Registry
+                </h5>
+                <p class="text-secondary small mb-4">
+                    Authorize trusted family members or guardians to access your medical records. Relatives get <strong>read-only access</strong> to view your prescriptions, lab reports, and medicine schedules.
+                </p>
+
+                <div class="row g-4">
+                    <!-- Form to add relative -->
+                    <div class="col-lg-4 border-end border-secondary border-opacity-10 pe-lg-4">
+                        <h6 class="text-white fw-semibold mb-3">Grant New Access</h6>
+                        <form action="{{ url_for('add_relative') }}" method="POST">
+                            <div class="mb-3">
+                                <label for="relative_name" class="form-label text-secondary small">Relative Full Name</label>
+                                <input type="text" class="form-control form-simpill-control form-control-sm" id="relative_name" name="relative_name" placeholder="Sarah Smith" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="relative_email" class="form-label text-secondary small">Relative Email Address</label>
+                                <input type="email" class="form-control form-simpill-control form-control-sm" id="relative_email" name="relative_email" placeholder="sarah@example.com" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="relationship" class="form-label text-secondary small">Relationship Type</label>
+                                <select class="form-select form-simpill-control form-simpill-select form-select-sm" id="relationship" name="relationship" required>
+                                    <option value="" disabled selected>Select Relation...</option>
+                                    <option value="Spouse">Spouse</option>
+                                    <option value="Parent">Parent</option>
+                                    <option value="Child">Child</option>
+                                    <option value="Sibling">Sibling</option>
+                                    <option value="Guardian">Guardian</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-simpill btn-simpill-primary w-100 mt-2">
+                                Grant Access <i class="bi bi-plus-circle ms-1"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Active linkages list -->
+                    <div class="col-lg-8 ps-lg-4">
+                        <h6 class="text-white fw-semibold mb-3">Authorized Relatives</h6>
+                        {% if relatives %}
+                            <div class="simpill-table-container">
+                                <table class="table table-simpill mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Email</th>
+                                            <th scope="col">Relationship</th>
+                                            <th scope="col">Access Granted</th>
+                                            <th scope="col" style="text-align: center; width: 120px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for rel in relatives %}
+                                            <tr>
+                                                <td><strong class="text-white">{{ rel.relative_name or 'Pending Registration' }}</strong></td>
+                                                <td><span class="text-secondary small">{{ rel.relative_email }}</span></td>
+                                                <td>
+                                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-20 px-2 py-0.5 small">
+                                                        {{ rel.relationship }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-secondary small">{{ rel.created_at }}</td>
+                                                <td class="text-center">
+                                                    <a href="{{ url_for('revoke_relative', relation_id=rel.relation_id) }}" class="btn btn-sm btn-outline-danger py-0.5 px-2" onclick="return confirm('Revoke records access for this relative?');">
+                                                        Revoke <i class="bi bi-x-circle ms-1"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5 text-secondary border border-secondary border-opacity-10 rounded-3">
+                                <i class="bi bi-shield-lock-fill fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                No relatives currently authorized. Add access parameters on the left.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

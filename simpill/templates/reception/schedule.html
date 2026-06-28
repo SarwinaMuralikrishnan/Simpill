@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Schedule Visit – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link">
+                    <i class="bi bi-calendar-check"></i> Desk Console
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('register_walkin_patient') }}" class="sidebar-menu-link">
+                    <i class="bi bi-person-plus-fill"></i> Register Walk-in
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('schedule_appointment') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-clock-history"></i> Schedule Visit
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <div class="mb-4">
+            <a href="{{ url_for('dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to Operations Console
+            </a>
+            <h2 class="text-white fw-bold mt-2">Schedule Patient Appointment</h2>
+            <p class="text-secondary">Book a consult time-slot matching a patient with a clinic physician.</p>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="glass-card p-5">
+                    <form action="{{ url_for('schedule_appointment') }}" method="POST">
+                        <div class="row">
+                            <!-- Patient Select -->
+                            <div class="col-md-6 mb-3">
+                                <label for="patient_id" class="form-label text-secondary small fw-medium">Select Patient</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    <select class="form-select form-simpill-control form-simpill-select" id="patient_id" name="patient_id" required>
+                                        <option value="" disabled {% if not request.args.get('patient_id') %}selected{% endif %}>Choose Patient...</option>
+                                        {% for patient in patients %}
+                                            <option value="{{ patient.id }}" {% if request.args.get('patient_id')|int == patient.id %}selected{% endif %}>
+                                                {{ patient.full_name }} ({{ patient.email }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Doctor Select -->
+                            <div class="col-md-6 mb-3">
+                                <label for="doctor_id" class="form-label text-secondary small fw-medium">Assign Doctor</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-heart-pulse"></i>
+                                    </span>
+                                    <select class="form-select form-simpill-control form-simpill-select" id="doctor_id" name="doctor_id" required>
+                                        <option value="" disabled selected>Choose Doctor...</option>
+                                        {% for doctor in doctors %}
+                                            <option value="{{ doctor.id }}">{{ doctor.full_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Date Input -->
+                            <div class="col-md-6 mb-4">
+                                <label for="date" class="form-label text-secondary small fw-medium">Appointment Date</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-calendar-date"></i>
+                                    </span>
+                                    <input type="date" class="form-control form-simpill-control" id="date" name="date" required>
+                                </div>
+                            </div>
+
+                            <!-- Time Input -->
+                            <div class="col-md-6 mb-4">
+                                <label for="time" class="form-label text-secondary small fw-medium">Appointment Time</label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                        <i class="bi bi-clock"></i>
+                                    </span>
+                                    <input type="time" class="form-control form-simpill-control" id="time" name="time" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-end gap-3 mt-3">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-simpill btn-simpill-outline">Cancel</a>
+                            <button type="submit" class="btn btn-simpill btn-simpill-primary">
+                                Schedule Appointment <i class="bi bi-check-circle ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Pre-populate today's date as min date
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('date').min = today;
+</script>
+{% endblock %}

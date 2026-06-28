@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{% block title %}Pharmacy Console – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-capsule"></i> Pharmacy Console
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <span class="badge badge-role badge-role-pharmacist mb-2">Medicine Dispensary</span>
+                <h2 class="text-white fw-bold mb-1">Pharmacy Operations</h2>
+                <p class="text-secondary mb-0">Dispense physician prescriptions and track clinic medicine inventory.</p>
+            </div>
+            <div>
+                <button type="button" class="btn btn-simpill btn-simpill-primary d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Add New Medicine
+                </button>
+            </div>
+        </div>
+
+        <!-- Low Stock Banner Alert -->
+        {% if low_stock %}
+        <div class="alert alert-simpill alert-simpill-danger mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill text-danger fs-4 me-3"></i>
+                <div>
+                    <strong class="text-white">Critical Stock Alert!</strong> The following medications have low stock (under 10 units): 
+                    {% for item in low_stock %}
+                        <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25 ms-1 fw-bold">{{ item.name }} ({{ item.quantity }} left)</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Metrics Row -->
+        <div class="row g-4 mb-4">
+            <!-- Metric 1: Pending Dispenses -->
+            <div class="col-md-3 col-sm-6">
+                <div class="glass-card stat-card patients p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-secondary small d-block">Pending Prescriptions</span>
+                            <h3 class="text-white fw-bold mt-1 mb-0">
+                                {{ prescriptions | selectattr('status', 'equalto', 'Pending') | list | length }}
+                            </h3>
+                        </div>
+                        <div class="p-2 bg-primary bg-opacity-10 text-primary rounded-3">
+                            <i class="bi bi-hourglass-split fs-4"></i>
+                        </div>
+                    </div>
+                    <span class="text-secondary small">Awaiting preparation</span>
+                </div>
+            </div>
+
+            <!-- Metric 2: Completed Dispenses -->
+            <div class="col-md-3 col-sm-6">
+                <div class="glass-card stat-card doctors p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-secondary small d-block">Dispensed Orders</span>
+                            <h3 class="text-white fw-bold mt-1 mb-0">
+                                {{ prescriptions | selectattr('status', 'equalto', 'Dispensed') | list | length }}
+                            </h3>
+                        </div>
+                        <div class="p-2 bg-success bg-opacity-10 text-success rounded-3">
+                            <i class="bi bi-check2-circle fs-4"></i>
+                        </div>
+                    </div>
+                    <span class="text-secondary small">Medications dispensed</span>
+                </div>
+            </div>
+
+            <!-- Metric 3: Total Inventory Items -->
+            <div class="col-md-3 col-sm-6">
+                <div class="glass-card stat-card staff p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-secondary small d-block">Inventory Items</span>
+                            <h3 class="text-white fw-bold mt-1 mb-0">{{ medicines | length }}</h3>
+                        </div>
+                        <div class="p-2 bg-info bg-opacity-10 text-info rounded-3">
+                            <i class="bi bi-box-seam fs-4"></i>
+                        </div>
+                    </div>
+                    <span class="text-secondary small">Unique drugs in stock</span>
+                </div>
+            </div>
+
+            <!-- Metric 4: Low Stock Count -->
+            <div class="col-md-3 col-sm-6">
+                <div class="glass-card stat-card patients p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="text-secondary small d-block">Low Stock Alert</span>
+                            <h3 class="{% if low_stock %}text-danger{% else %}text-white{% endif %} fw-bold mt-1 mb-0">{{ low_stock | length }}</h3>
+                        </div>
+                        <div class="p-2 {% if low_stock %}bg-danger text-danger{% else %}bg-secondary text-secondary{% endif %} bg-opacity-10 rounded-3">
+                            <i class="bi bi-exclamation-octagon fs-4"></i>
+                        </div>
+                    </div>
+                    <span class="text-secondary small">Under 10 units available</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Console Tabs -->
+        <div class="glass-card p-4">
+            <nav class="mb-4">
+                <div class="nav nav-tabs border-secondary border-opacity-25" id="nav-tab" role="tablist">
+                    <button class="nav-link text-secondary border-0 active" id="nav-pending-tab" data-bs-toggle="tab" data-bs-target="#nav-pending" type="button" role="tab" aria-controls="nav-pending" aria-selected="true">
+                        <i class="bi bi-clock me-1"></i> Pending Prescriptions ({{ prescriptions | selectattr('status', 'equalto', 'Pending') | list | length }})
+                    </button>
+                    <button class="nav-link text-secondary border-0" id="nav-inventory-tab" data-bs-toggle="tab" data-bs-target="#nav-inventory" type="button" role="tab" aria-controls="nav-inventory" aria-selected="false">
+                        <i class="bi bi-box-seam me-1"></i> Inventory Tracking ({{ medicines | length }})
+                    </button>
+                    <button class="nav-link text-secondary border-0" id="nav-dispensed-tab" data-bs-toggle="tab" data-bs-target="#nav-dispensed" type="button" role="tab" aria-controls="nav-dispensed" aria-selected="false">
+                        <i class="bi bi-check2 me-1"></i> Dispensing Logs ({{ dispensed_history | length }})
+                    </button>
+                </div>
+            </nav>
+
+            <div class="tab-content" id="nav-tabContent">
+                <!-- Tab 1: Pending Prescriptions -->
+                <div class="tab-pane fade show active" id="nav-pending" role="tabpanel" aria-labelledby="nav-pending-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Date Prescribed</th>
+                                    <th scope="col">Patient Name</th>
+                                    <th scope="col">Prescribed By</th>
+                                    <th scope="col">Medication Details</th>
+                                    <th scope="col" style="width: 180px; text-align: center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set pending_list = prescriptions | selectattr('status', 'equalto', 'Pending') | list %}
+                                {% if pending_list %}
+                                    {% for pres in pending_list %}
+                                        <tr>
+                                            <td class="text-secondary small">{{ pres.created_at }}</td>
+                                            <td><strong class="text-white">{{ pres.patient_name }}</strong></td>
+                                            <td><strong class="text-secondary small">Dr. {{ pres.doctor_name }}</strong></td>
+                                            <td>
+                                                <span class="text-white d-block small fw-bold">{{ pres.medicine_name }}</span>
+                                                <span class="text-info d-block small" style="font-size: 0.8rem;">Dosage: {{ pres.dosage }}</span>
+                                                {% if pres.instructions %}
+                                                    <span class="text-secondary d-block small" style="font-size: 0.75rem; font-style: italic;">Note: {{ pres.instructions }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                <a href="{{ url_for('dispense_medication', pres_id=pres.id) }}" class="btn btn-sm btn-outline-success px-3">
+                                                    Dispense <i class="bi bi-capsule-pill ms-1"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-folder-check fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            All prescriptions have been dispensed!
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Inventory Tracking -->
+                <div class="tab-pane fade" id="nav-inventory" role="tabpanel" aria-labelledby="nav-inventory-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 80px;">ID</th>
+                                    <th scope="col">Medicine Name</th>
+                                    <th scope="col" style="width: 150px; text-align: center;">Stock Qty</th>
+                                    <th scope="col">Expiry Date</th>
+                                    <th scope="col">Unit Price</th>
+                                    <th scope="col" style="width: 150px; text-align: center;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if medicines %}
+                                    {% for med in medicines %}
+                                        <tr>
+                                            <td>{{ med.id }}</td>
+                                            <td><span class="text-white fw-bold">{{ med.name }}</span></td>
+                                            <td class="text-center">
+                                                {% if med.quantity <= 10 %}
+                                                    <span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-20 fw-bold px-3 py-1.5">
+                                                        {{ med.quantity }} (Low)
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 fw-medium px-3 py-1.5">
+                                                        {{ med.quantity }} Units
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-secondary small">{{ med.expiry_date }}</td>
+                                            <td><strong class="text-info">${{ "%.2f" | format(med.price) }}</strong></td>
+                                            <td class="text-center">
+                                                <a href="{{ url_for('edit_medicine', medicine_id=med.id) }}" class="btn btn-sm btn-outline-info">
+                                                    Edit Stock <i class="bi bi-pencil-square ms-1"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-box fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            Inventory is empty. Add medicine items to list.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Dispensed Logs -->
+                <div class="tab-pane fade" id="nav-dispensed" role="tabpanel" aria-labelledby="nav-dispensed-tab">
+                    <div class="simpill-table-container">
+                        <table class="table table-simpill">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Dispensed Date</th>
+                                    <th scope="col">Patient Name</th>
+                                    <th scope="col">Prescribing Doctor</th>
+                                    <th scope="col">Prescribed Medication</th>
+                                    <th scope="col">Fulfilled Item</th>
+                                    <th scope="col" style="width: 120px; text-align: center;">Qty Dispensed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if dispensed_history %}
+                                    {% for log in dispensed_history %}
+                                        <tr>
+                                            <td class="text-secondary small">{{ log.dispensed_at }}</td>
+                                            <td><strong class="text-white">{{ log.patient_name }}</strong></td>
+                                            <td><strong class="text-secondary small">Dr. {{ log.doctor_name }}</strong></td>
+                                            <td>
+                                                <span class="text-white d-block small">{{ log.prescribed_med }}</span>
+                                                <span class="text-secondary d-block small" style="font-size: 0.75rem;">Dosage: {{ log.dosage }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-10 fw-medium px-2 py-1">
+                                                    {{ log.medicine_name }}
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <strong class="text-white">{{ log.quantity }}</strong>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-secondary">
+                                            <i class="bi bi-journal-x fs-2 d-block mb-2 text-secondary text-opacity-25"></i>
+                                            No dispensed transactions recorded yet.
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal: Add New Medicine -->
+<div class="modal fade" id="addMedicineModal" tabindex="-1" aria-labelledby="addMedicineModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-secondary border-opacity-20 shadow-lg" style="background-color: #0b111e; backdrop-filter: blur(10px);">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title text-white fw-bold" id="addMedicineModalLabel">Add Medicine to Inventory</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('add_new_medicine') }}" method="POST">
+                <div class="modal-body p-4">
+                    <p class="text-secondary small mb-4">Input the new clinical medicine name, stock count, expiration parameters, and price tags.</p>
+                    
+                    <!-- Name -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label text-secondary small fw-medium">Medicine Name & Strength</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                <i class="bi bi-capsule"></i>
+                            </span>
+                            <input type="text" class="form-control form-simpill-control" id="name" name="name" placeholder="Paracetamol 500mg" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Quantity -->
+                        <div class="col-6 mb-3">
+                            <label for="quantity" class="form-label text-secondary small fw-medium">Stock Quantity</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-box"></i>
+                                </span>
+                                <input type="number" class="form-control form-simpill-control" id="quantity" name="quantity" placeholder="100" min="0" required>
+                            </div>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="col-6 mb-3">
+                            <label for="price" class="form-label text-secondary small fw-medium">Price (Per Unit)</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </span>
+                                <input type="number" step="0.01" class="form-control form-simpill-control" id="price" name="price" placeholder="4.99" min="0.01" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expiry Date -->
+                    <div class="mb-3">
+                        <label for="expiry_date" class="form-label text-secondary small fw-medium">Expiry Date</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                <i class="bi bi-calendar-event"></i>
+                            </span>
+                            <input type="date" class="form-control form-simpill-control" id="expiry_date" name="expiry_date" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-simpill btn-simpill-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-simpill btn-simpill-primary">Add Item <i class="bi bi-plus-circle ms-1"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to SimPill – Smart AI Medicine & Healthcare Portal{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center text-md-start">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="badge bg-opacity-10 bg-cyan text-gradient-cyan-teal mb-3 px-3 py-2 border border-info border-opacity-25 rounded-pill fw-semibold">
+                    <i class="bi bi-cpu me-1"></i> AI-Powered Healthcare
+                </div>
+                <h1 class="display-3 fw-bold text-white mb-3 leading-tight">
+                    Smart Medicine & <br>
+                    <span class="text-gradient-cyan-teal">Healthcare Control</span>
+                </h1>
+                <p class="lead text-secondary mb-4 fs-5">
+                    Welcome to SimPill – the next generation medical dashboard. We unify patients, doctors, lab technicians, pharmacists, receptionists, cashiers, and administrators into one secure, real-time ecosystem.
+                </p>
+                <div class="d-flex flex-column flex-sm-row gap-3">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'Admin' %}
+                            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-simpill btn-simpill-primary d-flex align-items-center justify-content-center">
+                                <i class="bi bi-speedometer2 me-2"></i> Enter Admin Console
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-simpill btn-simpill-primary d-flex align-items-center justify-content-center">
+                                <i class="bi bi-speedometer me-2"></i> Go to Dashboard
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('signup') }}" class="btn btn-simpill btn-simpill-primary d-flex align-items-center justify-content-center">
+                            Get Started (Patient) <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-simpill btn-simpill-outline d-flex align-items-center justify-content-center">
+                            Sign In to Portal <i class="bi bi-box-arrow-in-right ms-2"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-lg-6 text-center">
+                <!-- Visual Mockup Card representing AI diagnostics -->
+                <div class="glass-card p-4 text-start max-width-450 mx-auto border border-opacity-10 border-light position-relative">
+                    <div class="position-absolute top-0 end-0 m-3 text-success">
+                        <span class="spinner-grow spinner-grow-sm me-1" role="status" aria-hidden="true"></span>
+                        <small class="fw-semibold">AI System Active</small>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-heart-pulse-fill text-danger fs-3 me-2"></i>
+                        <span class="fw-bold fs-5">Active Analysis</span>
+                    </div>
+                    <div class="p-3 bg-dark bg-opacity-50 rounded-3 border border-secondary border-opacity-25 mb-3">
+                        <div class="d-flex justify-content-between text-secondary mb-2 small">
+                            <span>Diagnostic Engine</span>
+                            <span>v2.4-stable</span>
+                        </div>
+                        <h6 class="text-white mb-2">SimPill Neural Scanner</h6>
+                        <p class="text-secondary small mb-0">Cross-checking user profile and role authentication credentials. 100% encrypted environment secure check...</p>
+                    </div>
+                    <div class="row g-2 text-center">
+                        <div class="col-4">
+                            <div class="p-2 border border-secondary border-opacity-10 rounded-3 bg-secondary bg-opacity-10">
+                                <i class="bi bi-people text-info d-block fs-4 mb-1"></i>
+                                <span class="small text-secondary d-block">Roles</span>
+                                <strong class="text-white small">7 Roles</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border border-secondary border-opacity-10 rounded-3 bg-secondary bg-opacity-10">
+                                <i class="bi bi-shield-check text-success d-block fs-4 mb-1"></i>
+                                <span class="small text-secondary d-block">Security</span>
+                                <strong class="text-white small">SHA-256</strong>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border border-secondary border-opacity-10 rounded-3 bg-secondary bg-opacity-10">
+                                <i class="bi bi-database text-warning d-block fs-4 mb-1"></i>
+                                <span class="small text-secondary d-block">Storage</span>
+                                <strong class="text-white small">SQLite</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="py-5" style="background-color: var(--bg-secondary);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-white">Coordinated Healthcare Operations</h2>
+            <p class="text-secondary">SimPill serves all key segments of a smart modern clinic</p>
+        </div>
+        <div class="row g-4">
+            <!-- Patient card -->
+            <div class="col-md-4">
+                <div class="glass-card p-4 h-100">
+                    <div class="feature-icon-wrapper">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <h5 class="text-white fw-bold">Patients</h5>
+                    <p class="text-secondary small">Register accounts, request services, view medical records, and track medicine prescriptions online.</p>
+                </div>
+            </div>
+            
+            <!-- Doctor card -->
+            <div class="col-md-4">
+                <div class="glass-card p-4 h-100">
+                    <div class="feature-icon-wrapper" style="color: var(--accent-teal); background: rgba(13, 213, 194, 0.1); border-color: rgba(13, 213, 194, 0.2);">
+                        <i class="bi bi-heart-fill"></i>
+                    </div>
+                    <h5 class="text-white fw-bold">Doctors</h5>
+                    <p class="text-secondary small">Evaluate test reports, write prescriptions, and assign treatment schedules directly to user profiles.</p>
+                </div>
+            </div>
+            
+            <!-- Support staff card -->
+            <div class="col-md-4">
+                <div class="glass-card p-4 h-100">
+                    <div class="feature-icon-wrapper" style="color: var(--warning-amber); background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2);">
+                        <i class="bi bi-person-vcard-fill"></i>
+                    </div>
+                    <h5 class="text-white fw-bold">Staff Members</h5>
+                    <p class="text-secondary small">Receptionists, Pharmacists, Cashiers, and Lab Technicians collaborate inside the dashboard to fulfill requests.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

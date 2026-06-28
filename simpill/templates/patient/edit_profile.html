@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Health Profile – SimPill{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <a href="{{ url_for('dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+                <h2 class="text-white fw-bold mt-2">Edit Health Profile</h2>
+                <p class="text-secondary">Please complete your health profile details below to help us coordinate your care.</p>
+            </div>
+
+            <div class="glass-card p-5">
+                <form action="{{ url_for('edit_patient_profile') }}" method="POST">
+                    <div class="row">
+                        <!-- Age -->
+                        <div class="col-md-6 mb-3">
+                            <label for="age" class="form-label text-secondary small fw-medium">Age (Years)</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-calendar3"></i>
+                                </span>
+                                <input type="number" class="form-control form-simpill-control" id="age" name="age" 
+                                       placeholder="25" min="1" max="120" value="{% if profile and profile.age %}{{ profile.age }}{% endif %}" required>
+                            </div>
+                        </div>
+
+                        <!-- Gender -->
+                        <div class="col-md-6 mb-3">
+                            <label for="gender" class="form-label text-secondary small fw-medium">Gender</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-gender-ambiguous"></i>
+                                </span>
+                                <select class="form-select form-simpill-control form-simpill-select" id="gender" name="gender" required>
+                                    <option value="" disabled {% if not profile or not profile.gender %}selected{% endif %}>Select Gender</option>
+                                    <option value="Male" {% if profile and profile.gender == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if profile and profile.gender == 'Female' %}selected{% endif %}>Female</option>
+                                    <option value="Other" {% if profile and profile.gender == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Blood Group -->
+                        <div class="col-md-6 mb-3">
+                            <label for="blood_group" class="form-label text-secondary small fw-medium">Blood Group</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-droplet"></i>
+                                </span>
+                                <select class="form-select form-simpill-control form-simpill-select" id="blood_group" name="blood_group" required>
+                                    <option value="" disabled {% if not profile or not profile.blood_group %}selected{% endif %}>Select Blood Group</option>
+                                    <option value="A+" {% if profile and profile.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                                    <option value="A-" {% if profile and profile.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                                    <option value="B+" {% if profile and profile.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                                    <option value="B-" {% if profile and profile.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                                    <option value="AB+" {% if profile and profile.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                    <option value="AB-" {% if profile and profile.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                                    <option value="O+" {% if profile and profile.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                                    <option value="O-" {% if profile and profile.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Contact -->
+                        <div class="col-md-6 mb-3">
+                            <label for="emergency_contact" class="form-label text-secondary small fw-medium">Emergency Contact Phone</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-telephone-inbound"></i>
+                                </span>
+                                <input type="tel" class="form-control form-simpill-control" id="emergency_contact" name="emergency_contact" 
+                                       placeholder="+1 (555) 000-0000" value="{% if profile and profile.emergency_contact %}{{ profile.emergency_contact }}{% endif %}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Residential Address -->
+                    <div class="mb-4">
+                        <label for="address" class="form-label text-secondary small fw-medium">Residential Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                <i class="bi bi-geo-alt"></i>
+                            </span>
+                            <textarea class="form-control form-simpill-control" id="address" name="address" rows="3" 
+                                      placeholder="123 Health Ave, Suite 4B, City, Country" required>{% if profile and profile.address %}{{ profile.address }}{% endif %}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-flex justify-content-end gap-3 mt-3">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-simpill btn-simpill-outline">Cancel</a>
+                        <button type="submit" class="btn btn-simpill btn-simpill-primary">
+                            Save Profile <i class="bi bi-check-circle ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

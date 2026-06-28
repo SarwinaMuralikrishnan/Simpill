@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Update Intake Details – SimPill{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-heading">Management</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('dashboard') }}" class="sidebar-menu-link active">
+                    <i class="bi bi-calendar-check"></i> Desk Console
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('register_walkin_patient') }}" class="sidebar-menu-link">
+                    <i class="bi bi-person-plus-fill"></i> Register Walk-in
+                </a>
+            </li>
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('schedule_appointment') }}" class="sidebar-menu-link">
+                    <i class="bi bi-clock-history"></i> Schedule Visit
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-heading">System</div>
+        <ul class="sidebar-menu">
+            <li class="sidebar-menu-item">
+                <a href="{{ url_for('welcome') }}" class="sidebar-menu-link">
+                    <i class="bi bi-house-door"></i> View Homepage
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <div class="mb-4">
+            <a href="{{ url_for('dashboard') }}" class="text-gradient-cyan-teal text-decoration-none small fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to Console
+            </a>
+            <h2 class="text-white fw-bold mt-2">Update Intake Details</h2>
+            <p class="text-secondary">Update intake details for patient: <strong class="text-white">{{ intake.patient_name }}</strong></p>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-8">
+                <div class="glass-card p-5">
+                    <form action="{{ url_for('edit_patient_intake', intake_id=intake.id) }}" method="POST">
+                        <!-- Diagnosing Doctor -->
+                        <div class="mb-3">
+                            <label for="diagnosing_doctor" class="form-label text-secondary small fw-medium">Consulting / Diagnosing Doctor</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-person-badge"></i>
+                                </span>
+                                <input type="text" class="form-control form-simpill-control" id="diagnosing_doctor" name="diagnosing_doctor" 
+                                       value="{{ intake.diagnosing_doctor }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Symptoms -->
+                        <div class="mb-3">
+                            <label for="symptoms" class="form-label text-secondary small fw-medium">Symptoms Experienced</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-activity"></i>
+                                </span>
+                                <textarea class="form-control form-simpill-control" id="symptoms" name="symptoms" rows="3" required>{{ intake.symptoms }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Health Problems -->
+                        <div class="mb-3">
+                            <label for="health_problems" class="form-label text-secondary small fw-medium">Existing Health Problems / History</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                </span>
+                                <textarea class="form-control form-simpill-control" id="health_problems" name="health_problems" rows="3" required>{{ intake.health_problems }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Treatment Needs -->
+                        <div class="mb-4">
+                            <label for="treatment_needs" class="form-label text-secondary small fw-medium">Treatment Needs & Goals</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-secondary border-opacity-25 bg-secondary bg-opacity-10 text-secondary">
+                                    <i class="bi bi-heart"></i>
+                                </span>
+                                <textarea class="form-control form-simpill-control" id="treatment_needs" name="treatment_needs" rows="3" required>{{ intake.treatment_needs }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-end gap-3 mt-3">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-simpill btn-simpill-outline">Cancel</a>
+                            <button type="submit" class="btn btn-simpill btn-simpill-primary">
+                                Save Changes <i class="bi bi-check-circle ms-1"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
